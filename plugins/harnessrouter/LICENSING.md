@@ -1,5 +1,9 @@
-# Candidate licensing
+# HarnessRouter Plugin licensing
 
-The adjacent LICENSE preserves Apache-2.0 for inherited material from the HarnessRouter/skills packaging baseline at commit 227f694238a54f2f95ce641c1c014b9c89487829.
+Version 0.1.0-dev.3. This is a mixed-license package.
 
-New skills/harnessrouter/references/setup-local.md and skills/harnessrouter/references/persistent-use.md are reserved private-development materials; separate authorization is required except for existing platform or statutory rights. No integration-specific release license is effective yet. Inherited portions and their prior permissions remain unaffected. New edits do not revoke those permissions.
+The [Skill coverage map](skills/harnessrouter/LICENSING.md) is the authoritative list for all files under `skills/harnessrouter/`. New identified guides use the HarnessRouter Integration Skill License 1.0. Inherited files listed there retain Apache-2.0.
+
+`.codex-plugin/plugin.json` and `.claude-plugin/plugin.json` are Apache-2.0, including current metadata edits. The packaging source was local baseline 227f694238a54f2f95ce641c1c014b9c89487829; descriptions and version were updated for this candidate.
+
+Complete license texts are in [LICENSES/](LICENSES/) and are also included inside the Skill for independent distribution. This file and LICENSE may be copied with permitted distributions. Unlisted components need explicit licensing before distribution. No license here automatically covers another Plugin or product.

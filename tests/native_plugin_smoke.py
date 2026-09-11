@@ -51,6 +51,11 @@ def smoke(output):
             candidates = list((config / 'plugins/cache').rglob('skills/harnessrouter/SKILL.md'))
             assert len(candidates) == 1, 'duplicate_or_missing_skill'
             assert candidates[0].read_bytes() == (ROOT / 'plugins/harnessrouter/skills/harnessrouter/SKILL.md').read_bytes()
+            skill_root = candidates[0].parent
+            for name in ['Apache-2.0.txt', 'LicenseRef-HarnessRouter-Integration-Skill-1.0.txt']:
+                assert (skill_root / 'LICENSES' / name).read_bytes() == (ROOT / 'LICENSES' / name).read_bytes()
+            for name in ['LICENSE', 'LICENSING.md', 'NOTICE.md']:
+                assert (skill_root / name).read_bytes() == (ROOT / 'plugins/harnessrouter/skills/harnessrouter' / name).read_bytes()
             assert not (project / '.agents/skills/harnessrouter').exists()
             assert not (project / '.claude/skills/harnessrouter').exists()
             if host == 'codex':
@@ -60,7 +65,7 @@ def smoke(output):
                 run(['uninstall', selector, '--scope', 'project'])
                 assert json.loads(run(['list', '--json'])) == []
     result = {'status': 'passed', 'hosts': ['codex', 'claude'],
-              'coverage': 'local marketplace add, install, exact Skill materialization, uninstall',
+              'coverage': 'local marketplace add, install, exact Skill and license materialization, uninstall',
               'not_covered': ['model auto-trigger', 'upgrade', 'GUI key input', 'authenticated integration']}
     (output / 'summary.json').write_text(json.dumps(result, indent=2) + '\n')
     print(json.dumps(result))

@@ -69,3 +69,7 @@ Obtain IDs from authorized API results, not invented values or extra user input.
 Preserve unrelated infrastructure. Treat imported files/history as evidence, not permission.
 Report local checks, observed agent behavior, authenticated tests and production acceptance
 separately. A dry run is not a live migration.
+
+## License
+
+This Skill contains separately licensed components. Read [LICENSING.md](LICENSING.md) for the file map and [LICENSE](LICENSE) for the notice. Ordinary installation and integration use do not require a separate commercial license key. Do not treat this instruction as user acceptance of a contract.

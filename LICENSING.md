@@ -1,31 +1,33 @@
-# Licensing plan
+# HarnessRouter Plugins licensing
 
-Status: private development; proposed release licensing, not an operative integration Skill license.
+Versioned licensing map for the private development candidate 0.1.0-dev.3, dated 2026-09-10. Public release still requires owner approval; the license text is complete and the scopes below apply to this candidate. Earlier copies retain their earlier terms.
 
 ## Integration Skill
 
-The proposed name is **HarnessRouter Integration Skill License 1.0**. It will apply only to expressly identified, licensable original materials or contributions in the integration Skill, not automatically to the enclosing plugin or entire repository.
+The [HarnessRouter Integration Skill License 1.0](LICENSES/LicenseRef-HarnessRouter-Integration-Skill-1.0.txt) is a custom, purpose-limited copyright license. It is not an OSI-approved open-source license, and its LicenseRef identifier is local, not an SPDX-listed license.
 
-The intended grant allows individuals and organizations to use and adapt covered materials to connect, deploy, migrate to and use HarnessRouter, without a Skill license fee. This includes internal business use and paid client integration services. Product, cloud and model service fees remain separate.
+It permits royalty-free use for installing, connecting, deploying, migrating to and using HarnessRouter, including company use and paid customer integration. Persistent installation and ordinary coding-agent processing are expressly permitted. Copying or adapting covered expression or code for other business purposes, or reserved standalone redistribution, requires separate written authorization. Provider selection, independent products and independently authored implementations remain unrestricted by this license.
 
-Copying, pasting, translating, modifying or adapting covered copyrighted expression or code for business purposes outside the permitted HarnessRouter integration use would require separate written authorization. This boundary applies irrespective of competitor identity. It does not claim ownership of ideas, procedures or independently developed implementations.
+Licensor: Lumentree Corporation, a California corporation. Contact: contact@harnessrouter.ai. The grant extends only to rights it owns or may license; identifying the entity here does not certify the originality or assignment of every contribution.
 
-Necessary agent processing, installation copies, permitted client handoff, prior licenses and statutory rights must be addressed in the final terms. Rights-holder identity, file-level coverage and the full terms must be finalized before this license is applied.
+Exact scope: [Plugin licensing](plugins/harnessrouter/LICENSING.md) and [Skill file map](plugins/harnessrouter/skills/harnessrouter/LICENSING.md). Only the two named new guides currently use the custom license. Existing Apache content is not reclassified.
 
-## Existing and third-party materials
+## Other repository files
 
-Existing Apache-2.0 grants remain intact. Materials imported from HarnessRouter/skills and third-party projects must retain applicable licenses and notices. Moving a file does not change its license.
+| Paths | Terms |
+| --- | --- |
+| `.agents/plugins/marketplace.json`, `.claude-plugin/marketplace.json` | Apache-2.0, inherited packaging metadata and current edits |
+| `tests/native_plugin_smoke.py` | Apache-2.0, inherited packaging test with license-preservation assertions |
+| `plugins/harnessrouter/**` | Exact component scopes in the linked maps; no blanket license |
+| `LICENSE`, `LICENSING.md`, `LICENSES/**` | May be reproduced to accompany and explain permitted copies; functional material keeps its own terms |
+| `README.md`, `.gitignore`, `tests/VALIDATION.md`, `scripts/sync_licenses.py` | Rights reserved except separate authorization, platform permissions and applicable law |
 
-The documents and imagegen packages will retain their applicable component licenses. Shared packaging utilities and metadata need explicit coverage; they are not automatically subject to the integration Skill license.
+Unlisted files require explicit coverage before distribution. `documents` and `imagegen` are not yet included; their eventual import must preserve original component licenses and notices.
 
-## Release requirements
+## Provenance and distribution
 
-Before release, include a verified file-level licensing map, all applicable license texts and third-party notices in every standalone package and compatibility export. Do not mark inherited files exclusively proprietary or offer Apache as an alternative for protected new content unless that is expressly intended.
+Inherited content came from the HarnessRouter/skills packaging baseline at local commit 227f694238a54f2f95ce641c1c014b9c89487829, including the earlier public integration Skill at 504829160a8ff901df9628ff6dd7f8d556369632. Apache-2.0 is preserved in [LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt). Inherited marketplace descriptions and versions have been modified in this candidate. See the Skill's NOTICE.md for its modification record.
 
-References: [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) and [GitHub repository licensing guidance](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository).
+Every independent Plugin or Skill distribution must retain its coverage map, notices and complete license texts. `scripts/sync_licenses.py` copies canonical root texts into both distribution boundaries; `--check` verifies those copies byte-for-byte. Packaging and moving files do not change their licenses.
 
-## Current candidate coverage
-
-`plugins/harnessrouter/LICENSE` retains the Apache-2.0 text inherited from `HarnessRouter/skills` and the local packaging baseline at commit `227f694238a54f2f95ce641c1c014b9c89487829`. Inherited instructions, helpers and manifests retain those rights. The copied smoke test also retains its baseline Apache-2.0 licensing.
-
-New `references/setup-local.md` and `references/persistent-use.md` are private-development materials under the root rights-reservation notice, pending the integration license. The new edits to inherited entrypoints do not revoke any rights in their underlying material. No current file is represented as released under the proposed integration license. This mapping must be finalized before public distribution.
+Cloud services, CE software, model services and agent applications retain their own terms and charges. This license does not create a service account, collect an API key, record user assent or authorize publication.

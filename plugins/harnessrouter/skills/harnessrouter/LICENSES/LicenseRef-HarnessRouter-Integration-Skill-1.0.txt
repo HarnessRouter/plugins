@@ -1,0 +1,218 @@
+HarnessRouter Integration Skill License 1.0
+Version 1.0, September 10, 2026
+
+1. LICENSOR AND COVERAGE
+
+Lumentree Corporation, a California corporation ("Licensor"), offers this
+License for the materials expressly identified as covered in the accompanying
+LICENSING.md. HarnessRouter is a product brand. Permission requests and legal
+notices may be sent to contact@harnessrouter.ai.
+
+"You" means the individual or legal entity exercising rights under this
+License. If acting for an entity, You must have authority to exercise those
+rights for it.
+
+"Protected Materials" means copyright-protected original expression or code
+in the integration Skill's instructions, prompts, documentation, scripts or
+assets expressly identified as covered, including identified original
+contributions to otherwise separately licensed files. Coverage is determined
+by the licensing map supplied with the particular version You receive.
+
+Protected Materials exclude separately licensed content, including underlying
+Apache-2.0 material; material in which Licensor lacks authority to grant rights;
+ideas, facts, procedures, methods of operation and standard interfaces as such;
+and Your independently developed materials. This License grants rights only
+to the extent Licensor owns or is authorized to license them. It does not
+automatically cover the enclosing plugin, other skills, packaging utilities,
+product engines or services.
+
+2. ROYALTY-FREE HARNESSROUTER INTEGRATION USE
+
+"Integration Use" means evaluating, installing, deploying, connecting to,
+migrating to, developing with, operating or supporting HarnessRouter products
+or services, including Community Edition and self-hosted deployments, for
+Yourself or Your clients. It includes developing, operating and supporting
+applications that use HarnessRouter, including applications that also use
+other providers.
+
+Subject to the scope and conditions of this License, Licensor grants You a
+worldwide, non-exclusive, royalty-free copyright license to download, install,
+read, execute, reproduce, translate, modify and adapt Protected Materials for
+Integration Use. This includes security review, testing, backups, continuous
+integration, controlled internal mirrors and changes reasonably needed for
+Integration Use.
+
+Individuals, companies and other organizations may use this grant regardless
+of size, revenue or commercial status. You may charge for Your applications
+and for client integration, migration, development, operation and support.
+No separate Skill license fee or commercial-use approval is required for
+these permitted activities. Product, hosting, model and infrastructure fees
+are governed by their own terms.
+
+You may allow employees, contractors and service providers to process and
+use Protected Materials on Your behalf within this scope. You must provide
+them with the applicable terms and notices and may not authorize broader use.
+
+You may deliver copies or adaptations reasonably needed for a client's
+specific HarnessRouter integration, operation or maintenance. Include this
+License, the applicable coverage map and notices, identify Your changes, and
+make clear that the client receives the applicable rights directly under
+this License. This permission does not grant an unrestricted sublicense or
+authorize a standalone or white-label Skill product for general distribution.
+
+3. AGENTS, MODEL PROCESSING AND PERSISTENT INSTALLATION
+
+For Integration Use, You may supply reasonably necessary Protected Materials
+to coding agents and model services of Your choice and permit their processing,
+transmission, storage and copying to perform the permitted work. This includes
+prompt processing, execution, context caching, task-history retention,
+persistent Skill installation and reuse across projects and sessions.
+
+These activities and the service copies reasonably needed for them are
+permitted and are not prohibited distribution under Section 5. This License
+does not separately authorize use of Protected Materials to train or
+fine-tune a general-purpose model or create a reusable training corpus.
+Independently available licenses, platform permissions and statutory rights
+remain unaffected.
+
+This License does not change a provider's terms or data-handling practices,
+grant a provider permission to use Your other data, or guarantee any host's
+automatic Skill selection, storage duration or continued availability.
+
+4. YOUR APPLICATIONS, OUTPUTS AND INDEPENDENT WORK
+
+You retain Your rights in Your inputs, applications, independently authored
+code and other materials. You may use, deploy, sell and distribute applications
+and ordinary outputs developed through Integration Use. Using this Skill
+does not transfer their ownership to Licensor, impose an output royalty or
+require Your independent application to retain a Plugin dependency.
+
+If an output or deliverable reproduces Protected Materials, only that covered
+portion remains subject to this License. Having an agent rewrite, translate
+or generate a copy does not by itself remove the underlying rights.
+
+You may independently implement similar ideas, choose other providers and
+change providers. This License restricts covered materials, not independently
+created products or business activity as such. Separately licensed templates
+and code remain governed by their own terms.
+
+5. OTHER BUSINESS USE AND DISTRIBUTION OUTSIDE THE GRANT
+
+Except for the permissions in Sections 2 and 3 and the rights preserved in
+Section 6, You are not licensed to reproduce, including by copying and
+pasting, translate, modify or adapt copyright-protected expression or code
+from Protected Materials, or incorporate it into other materials, for any
+business purpose outside Integration Use. This includes using such material
+to create, maintain, operate or provide another skill, plugin, prompt library,
+workflow, product, service or integration, regardless of its functionality.
+
+You are also not licensed to sell, sublicense, publish, redistribute or make
+Protected Materials available as a standalone or reusable skill, plugin,
+prompt collection or development asset for third parties, whether modified
+or unmodified, paid or free. This includes rebranding or white-labeling such
+materials and offering access to a repackaged Skill or prompt library through
+a hosted service instead of distributing its files.
+
+Those activities require Licensor's prior, separate written authorization.
+Changing names, removing branding or using a model to rewrite copied material
+does not create that authorization. These limits depend on the use of covered
+materials and the purpose of that use and apply equally to all persons and
+entities.
+
+Ordinary applications using HarnessRouter, paid client integration and
+support, permitted client copies, controlled internal use and normal agent
+processing remain allowed under Sections 2 and 3. Linking others to the
+official distribution is allowed. Calling a separately marketed reusable
+Skill product a consulting deliverable does not expand the grant.
+
+6. EXISTING RIGHTS, NOTICES AND TRADEMARKS
+
+Nothing here restricts rights independently available under another license,
+applicable hosting-platform terms, or applicable law, including limitations
+and exceptions to copyright. In particular, this License does not withdraw
+Apache-2.0 rights previously granted, restrict use of the underlying Apache
+material under that license, or revoke rights to view or fork a public
+repository within GitHub under GitHub's applicable terms. Those platform
+rights do not by themselves grant additional off-platform rights here.
+
+Retain applicable copyright, license, coverage and attribution notices in
+permitted copies. When providing a modified copy to others, clearly identify
+Your changes. Do not represent a modified version as an unmodified official
+release. No trademark license or right to imply endorsement is granted.
+Your independent application need not display HarnessRouter branding merely
+because You used this Skill.
+
+7. OWNERSHIP AND CONTRIBUTIONS
+
+Licensor and the respective rights holders retain their rights in Protected
+Materials. You retain any rights You hold in Your original modifications,
+subject to the rights in underlying material. Private modifications need not
+be disclosed or assigned to Licensor. A voluntary contribution is governed
+by the contribution terms that actually apply to that submission; this
+License does not itself assign Your client work or other materials.
+
+8. DURATION, COMPLIANCE AND TERMINATION
+
+The grant for a version You lawfully obtain continues while You comply with
+this License. Starting or growing a business does not end free Integration
+Use. A later version of this License does not retroactively replace the terms
+for an earlier copy. Cloud account status does not itself terminate this
+Skill license, and this License grants no continuing Cloud access.
+
+An activity outside the grant has no authorization under this License and
+must stop unless You have an independent right or separate authorization.
+No cure period creates temporary permission for an otherwise unlicensed use.
+
+For a material breach of conditions governing otherwise permitted use,
+Licensor may terminate the affected grant by written notice identifying the
+breach if You do not cure it within 30 days after receiving that notice.
+Timely cure prevents termination on that notice but does not erase accrued
+claims. A terminated grant may be reinstated by Licensor in writing.
+
+On termination, stop activities that depend on the terminated grant and
+remove copies whose retention depends on it. You may retain copies required
+by law, without further use beyond that requirement. Rights under separate
+licenses, permitted client grants not themselves breached, and rights in
+independent applications remain unaffected. Termination does not authorize
+remote disabling of Your applications. Remedies are subject to applicable law.
+
+9. SERVICES, WARRANTIES AND LIABILITY
+
+This License does not provide hosting, model credits, support, updates,
+service levels or third-party services. HarnessRouter products, Community
+Edition software and third-party components remain subject to their separate
+terms. An API key is a service credential, not authorization for reserved
+reuse or distribution of Protected Materials.
+
+To the extent permitted by applicable law, Protected Materials are provided
+AS IS and AS AVAILABLE, without express or implied warranties, including
+warranties of merchantability, fitness for a particular purpose, title,
+non-infringement, accuracy or uninterrupted operation.
+
+To the extent permitted by applicable law, Licensor is not liable under this
+License for lost profits, lost data, or indirect, incidental, special or
+consequential damages arising from Protected Materials. This section does
+not exclude liability that cannot legally be excluded or override an express
+written warranty or support commitment separately applicable to You.
+
+10. APPLICATION OF THE TERMS
+
+You need not rely on this License for activities already authorized by law
+or an independent permission. Exercising rights granted only by this License
+is subject to its scope and conditions. A Skill instruction, agent response
+or repository access alone does not establish authority to accept unrelated
+contracts on another person's behalf.
+
+For Protected Materials, this text and the accompanying version-specific
+coverage map state the grant. A separate written authorization controls only
+the matters it expressly changes. A summary, manifest label or future
+website update does not enlarge coverage or replace this version. A coverage
+map cannot withdraw a separately granted right. If a provision is held
+unenforceable, the remaining provisions continue to the extent permitted by
+law; that does not expand the grant beyond the rights otherwise provided.
+
+Sections concerning reserved rights, ownership, applicable notices,
+disclaimers and accrued claims continue to the extent relevant after
+termination. Contact contact@harnessrouter.ai for separate permissions.
+
+END OF LICENSE

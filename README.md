@@ -18,7 +18,7 @@ Testing must cover Codex and Claude Code, credential input and cancellation, int
 
 ## Licensing
 
-This is a mixed-license project in preparation. See [LICENSE](LICENSE) and [LICENSING.md](LICENSING.md). No blanket MIT or Apache license is granted by this repository notice.
+This is a mixed-license project. See [LICENSE](LICENSE) and [LICENSING.md](LICENSING.md). The integration license permits free HarnessRouter use, including business and client projects, and reserves other business reuse of identified protected content. Existing Apache content retains its license. See the exact file map before redistribution.
 
 ## Private local testing
 

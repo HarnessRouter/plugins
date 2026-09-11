@@ -19,3 +19,5 @@ Authentication belongs to the Skill's target-specific flow; do not request keys 
 ```
 
 If the Plugin is missing in a later session, restore it from the trusted private checkout or approved release. Do not guess APIs or install from a similarly named source. Preserve the project's connection information across Plugin updates/uninstall; product data has a separate lifecycle.
+
+<!-- License: LicenseRef-HarnessRouter-Integration-Skill-1.0; scope: ../LICENSING.md; full text: ../LICENSES/LicenseRef-HarnessRouter-Integration-Skill-1.0.txt -->

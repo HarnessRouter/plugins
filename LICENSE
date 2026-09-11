@@ -1,13 +1,17 @@
-HarnessRouter Plugins — licensing notice
+HarnessRouter Plugins — mixed-license notice
 
-This repository is under private development. It does not currently offer a
-repository-wide open-source license. Except as separately authorized, rights
-in original material are reserved by the respective copyright holders.
+This repository contains materials under different terms. There is no
+repository-wide MIT or Apache grant. Consult LICENSING.md for exact coverage.
 
-Existing licenses, third-party licenses, platform permissions, and rights
-under applicable law remain unaffected. This notice does not replace or
-revoke any license previously granted for any material.
+The HarnessRouter Integration Skill License 1.0 applies only to expressly
+identified original materials. It allows royalty-free HarnessRouter
+integration, including company and paid client projects, subject to its terms.
+Other business reuse and reserved distribution require separate permission.
 
-The planned integration Skill license is not effective merely because it is
-described in LICENSING.md. Specific release coverage and terms must be stated
-before it is applied. See LICENSING.md for the proposed licensing structure.
+Apache-2.0 and other independently granted rights remain intact. Inclusion in
+this repository does not change the license of inherited material.
+
+Original materials not expressly licensed remain reserved by their respective
+rights holders, except for separate authorization and rights under applicable
+law or platform terms. License texts and licensing notices may be reproduced
+as needed to accompany and explain permitted copies.

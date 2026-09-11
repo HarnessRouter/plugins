@@ -31,3 +31,5 @@ For Cloud, use the existing discovery and [key setup](key-setup.md) flow after t
 ## Handoff
 
 Report the target, origin, instance readiness, provider readiness and observed first-task result without secrets. Follow [persistent-use.md](persistent-use.md) so later sessions can reuse the deployment. Product upgrades follow the official backup/upgrade guide and require the user's upgrade scope; updating this Plugin does not upgrade the product.
+
+<!-- License: LicenseRef-HarnessRouter-Integration-Skill-1.0; scope: ../LICENSING.md; full text: ../LICENSES/LicenseRef-HarnessRouter-Integration-Skill-1.0.txt -->
