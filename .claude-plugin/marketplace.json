@@ -1,0 +1,17 @@
+{
+  "name": "harnessrouter",
+  "owner": {
+    "name": "HarnessRouter"
+  },
+  "metadata": {
+    "description": "HarnessRouter plugins for developer integration."
+  },
+  "plugins": [
+    {
+      "name": "harnessrouter",
+      "source": "./plugins/harnessrouter",
+      "description": "Install, connect and reuse HarnessRouter.",
+      "version": "0.1.0-dev.2"
+    }
+  ]
+}
