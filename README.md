@@ -24,7 +24,17 @@ Cursor: add `https://github.com/HarnessRouter/plugins` as a marketplace in Curso
 and install HarnessRouter from it; Cursor can also load the portable plugin folder
 `plugins/harnessrouter` directly.
 
-Then start a new conversation and ask, for example:
+No terminal needed: paste this into Codex or Claude Code and the agent installs the plugin itself
+(it carries the commands above):
+
+> Install the HarnessRouter plugin for me. It comes from the plugin marketplace at
+> https://github.com/HarnessRouter/plugins and is named harnessrouter. Use your plugin manager to
+> add that marketplace and install the plugin. Tell me when it is installed; I will start a new
+> conversation to use it.
+
+A conversation only sees the plugins it started with (a Claude Code session that installed the
+plugin could not invoke the Skill until a new session, measured 2026-09-23), so start a new
+conversation and ask, for example:
 
 - "Build a product-launch video agent on HarnessRouter Cloud."
 - "Add a new HarnessRouter Cloud agent to my existing product."
