@@ -3,6 +3,7 @@
 
 import json
 from pathlib import Path
+import re
 import unittest
 
 
@@ -17,10 +18,22 @@ class CloudScopeTest(unittest.TestCase):
         codex = json.loads((PLUGIN / ".codex-plugin" / "plugin.json").read_text())
         claude = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())
         marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
-        self.assertEqual(version, "0.2.0-dev.1")
+        cursor = json.loads((ROOT / ".cursor-plugin" / "marketplace.json").read_text())
+        portable = json.loads((PLUGIN / "plugin.json").read_text())
+        self.assertEqual(version, "0.2.0-dev.2")
+        self.assertEqual(portable["version"], version)
         self.assertEqual(codex["version"], version)
         self.assertEqual(claude["version"], version)
         self.assertEqual(marketplace["plugins"][0]["version"], version)
+        self.assertEqual(cursor["plugins"][0]["version"], version)
+
+    def test_portable_plugin_structure(self):
+        portable = json.loads((PLUGIN / "plugin.json").read_text())
+        self.assertEqual(portable["$schema"], "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json")
+        self.assertEqual(portable["name"], "harnessrouter")
+        self.assertTrue((SKILL_ROOT / "SKILL.md").is_file())
+        self.assertTrue((PLUGIN / ".codex-plugin" / "plugin.json").is_file())
+        self.assertTrue((PLUGIN / ".claude-plugin" / "plugin.json").is_file())
 
     def test_implicit_trigger_covers_both_agentic_jobs(self):
         skill = (SKILL_ROOT / "SKILL.md").read_text()
@@ -55,6 +68,18 @@ class CloudScopeTest(unittest.TestCase):
             self.assertNotIn(forbidden, surfaces)
         self.assertIn("always cloud", surfaces)
         self.assertIn("never substitute a local harnessrouter deployment", surfaces)
+
+    def test_skill_relative_markdown_links_resolve(self):
+        markdown_files = [SKILL_ROOT / "SKILL.md", *sorted((SKILL_ROOT / "references").glob("*.md"))]
+        failures = []
+        for source in markdown_files:
+            for target in re.findall(r"\[[^\]]+\]\(([^)]+)\)", source.read_text()):
+                if "://" in target or target.startswith("#"):
+                    continue
+                path = (source.parent / target.split("#", 1)[0]).resolve()
+                if not path.exists():
+                    failures.append(f"{source.name}: {target}")
+        self.assertEqual(failures, [])
 
 
 if __name__ == "__main__":

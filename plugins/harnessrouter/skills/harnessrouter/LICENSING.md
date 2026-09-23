@@ -1,6 +1,6 @@
 # HarnessRouter integration Skill: file coverage
 
-Applies to candidate version **0.2.0-dev.1** and this accompanying file set, dated 2026-09-22. It does not replace terms for earlier copies. Paths below are relative to this Skill directory.
+Applies to candidate version **0.2.0-dev.2** and this accompanying file set, dated 2026-09-22. It does not replace terms for earlier copies. Paths below are relative to this Skill directory.
 
 ## HarnessRouter Integration Skill License 1.0
 

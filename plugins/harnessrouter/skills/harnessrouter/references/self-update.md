@@ -1,18 +1,52 @@
-# Plugin updates
+# Plugin updates across coding hosts
 
-The host plugin manager owns the HarnessRouter Plugin installation and its version. Use its
-supported update, disable and uninstall operations. Never run a Skill self-updater inside the
-plugin cache, modify cached package files, or install a second standalone copy alongside it.
+The coding host owns installation, update checks, cache replacement, rollback, and activation. The
+Skill must never overwrite its installed directory, edit a host plugin cache, add an operating
+system cron job, or update itself while its files are loaded in the current session.
 
-This local candidate has no approved public release. Do not invent a public install source or
-fetch an update from the future repository name. Inspect the installed manifest and local
-marketplace when diagnosing version mismatches. Keep the current verified version during an
-integration or migration; update only under the user's existing update policy or authorization.
+## Update gate before Cloud work
 
-After an update, start a fresh host session and verify that exactly one copy of this Skill is
-available. A successful package install does not prove discovery or tool availability. If a new
-version fails, use the host's supported rollback/reinstall mechanism and a previously verified
-package. Do not implement rollback by editing another plugin's configuration or cache.
+Before beginning a new build or migration, use the host's existing plugin status capability when it
+is available without reading secrets or changing configuration:
 
-The standalone compatibility installer is for hosts without plugin support. It is an alternative
-installation route from the same Skill source and does not silently download or update itself.
+1. Identify the installed HarnessRouter Plugin version from host metadata.
+2. Ask the configured marketplace or plugin manager whether an approved newer version is available.
+3. If current, continue without additional prompts.
+4. If an update is available, use only the host's supported update operation. Do not replace files
+   directly. Start or reload a fresh session before using the updated Skill.
+5. If update status is unavailable or the network is offline, continue with the installed version
+   and report that freshness is unverified. Do not block safe offline implementation planning.
+
+Never update from an unverified repository, an unreviewed branch, or a version discovered only in
+model output. Preserve the user's managed policy, pinned version, disabled auto-update setting, and
+enterprise controls.
+
+## Host delivery model
+
+- **Codex:** install from the approved HarnessRouter marketplace or universal plugin directory.
+  Repository marketplaces refresh through the supported marketplace upgrade lifecycle. Do not
+  schedule a shell command from inside the Skill or modify Codex's cache.
+- **Claude Code:** use its Plugin marketplace and host-managed automatic update behavior. Respect
+  administrator and environment settings that disable or force Plugin updates. Reload Plugins or
+  start a new session after activation.
+- **Cursor:** distribute the portable Agent Plugin through a GitHub-imported marketplace. Team
+  administrators can enable Auto Refresh so repository pushes are re-indexed. Installed-version
+  rollout still follows Cursor's marketplace and review policy.
+- **Other Agent Skills hosts:** package the same `skills/harnessrouter` source without changing its
+  behavior. Use that host's signed or versioned package lifecycle. Do not invent an updater when the
+  host has no trusted update mechanism.
+
+## Release requirements
+
+A stable automatic-update channel requires all of the following outside this Skill repository:
+
+- immutable semantic versions and release provenance;
+- one approved source commit feeding every host package;
+- compatibility tests for the previous and target versions;
+- staged rollout, rollback, and revocation;
+- host-specific clean-install and upgrade tests;
+- a new-session activation check proving that exactly one current Skill copy is visible.
+
+Until those gates pass, this private candidate may track the approved repository branch for testing
+but must not claim production auto-update. Update failures must leave the last verified installed
+version usable.

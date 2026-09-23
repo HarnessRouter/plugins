@@ -32,23 +32,27 @@ HarnessRouter Cloud and do not execute a local deployment workflow.
 The coding agent owns the implementation. Do not make the user translate their product into
 HarnessRouter concepts or manually assemble an integration plan that can be derived from the code.
 
-1. Inspect the relevant product code, architecture, authentication, data boundaries, existing
+1. Read [self-update.md](references/self-update.md) and perform its non-mutating host update gate.
+   Respect version pins and enterprise policy. Never self-modify the installed Plugin or create an
+   operating-system cron job.
+2. Inspect the relevant product code, architecture, authentication, data boundaries, existing
    agent calls, and tests.
-2. Define the end-user job and separate host-product work from bounded runtime agent jobs. Read
+3. Define the end-user job and separate host-product work from bounded runtime agent jobs. Read
    [agent-features-and-harnesses.md](references/agent-features-and-harnesses.md).
-3. Determine the required Workspace, Harnesses, models, Tools, Skills, sessions, files, Artifacts,
+4. Determine the required Workspace, Harnesses, models, Tools, Skills, sessions, files, Artifacts,
    permissions, limits, and product-owned routes. Load only the relevant technical references.
-4. Before the first Cloud API operation, run `scripts/discover_interface.py` without
+5. Before the first Cloud API operation, run `scripts/discover_interface.py` without
    authentication. Verify the deployed contract. Source code is not proof of deployment.
-5. Before authentication, read [key-setup.md](references/key-setup.md). Reuse an existing valid
-   server-side credential when present. Otherwise pause only for the minimum trusted login,
-   Workspace selection, or secret-storage action that requires the user.
-6. Reuse matching Cloud resources when safe. Create or update the required HarnessRouter Cloud
+6. Before authentication, read [key-setup.md](references/key-setup.md). Reuse an existing valid
+   server-side credential when present. If it is missing, invoke the supported secure-input flow so
+   the host opens a hidden-entry modal. Never ask the user to paste a key into chat or manually edit
+   an environment file. Pause only when the host cannot provide a trusted input capability.
+7. Reuse matching Cloud resources when safe. Create or update the required HarnessRouter Cloud
    resources, then implement the product's server-side integration and tests. Do not put a
    developer key in browser code or expose unrestricted HarnessRouter objects to end users.
-7. Verify the real end-user path through the product. A successful direct API request proves only
+8. Verify the real end-user path through the product. A successful direct API request proves only
    one layer and is not completion.
-8. Record a small non-secret project handoff using
+9. Record a small non-secret project handoff using
    [persistent-use.md](references/persistent-use.md) so later coding sessions reuse the same Cloud
    integration.
 
@@ -78,7 +82,7 @@ boundary only when the existing project and authenticated account do not establi
   [files-artifacts-and-rendering.md](references/files-artifacts-and-rendering.md)
 - Identity, tenancy, secrets, and acceptance:
   [security-and-testing.md](references/security-and-testing.md)
-- Plugin version diagnostics: [self-update.md](references/self-update.md)
+- Cross-host installation freshness and updates: [self-update.md](references/self-update.md)
 
 Treat these references as maintained workflow guidance. Check exact fields against the deployed
 HarnessRouter Cloud service and report contract drift. Do not assume optional capabilities or

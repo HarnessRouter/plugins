@@ -13,7 +13,21 @@ import urllib.error
 
 ENV_NAME = "HR_API_KEY"
 FILE_NAME = ".env.harnessrouter"
-DIALOG = 'text returned of (display dialog "Paste your HarnessRouter API key (sk-hr-). Stored only in this project server environment." default answer "" with hidden answer buttons {"Cancel", "Save"} default button "Save" cancel button "Cancel")'
+DIALOG = '''
+const app = Application.currentApplication();
+app.includeStandardAdditions = true;
+const result = app.displayDialog(
+  "Paste your HarnessRouter API key (sk-hr-). It will be stored only in this project's server environment.",
+  {
+    defaultAnswer: "",
+    hiddenAnswer: true,
+    buttons: ["Cancel", "Save"],
+    defaultButton: "Save",
+    cancelButton: "Cancel"
+  }
+);
+result.textReturned;
+'''
 
 def destination(project):
     requested = Path(project).absolute()
@@ -59,7 +73,9 @@ def prompt():
     if sys.platform != "darwin":
         return "INPUT_UNAVAILABLE", None
     try:
-        p = subprocess.run(["osascript","-e",DIALOG],capture_output=True,timeout=120)
+        p = subprocess.run(["osascript","-l","JavaScript","-e",DIALOG],capture_output=True,timeout=120)
+    except KeyboardInterrupt:
+        return "CANCELLED", None
     except (OSError,subprocess.TimeoutExpired):
         return "INPUT_UNAVAILABLE", None
     if p.returncode:
@@ -71,6 +87,23 @@ def prompt():
     if not re.fullmatch(r"sk-hr-[A-Za-z0-9_-]{8,}", value):
         return "INVALID_FORMAT", None
     return "KEY_SAVED", value
+
+def write_key(root, target, ignore, value):
+    old_ignore = ignore.read_text() if ignore.exists() else ""
+    check = subprocess.run(["git","-C",str(root),"check-ignore","--quiet",FILE_NAME],capture_output=True)
+    if check.returncode:
+        ignore.write_text(old_ignore + ("\n" if old_ignore and not old_ignore.endswith("\n") else "") + "/"+FILE_NAME+"\n")
+    fd, temp = tempfile.mkstemp(prefix=".hr-key-",dir=root)
+    try:
+        os.fchmod(fd,0o600)
+        with os.fdopen(fd,"w") as f:
+            f.write(ENV_NAME+"="+value+"\n")
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(temp,target)
+    finally:
+        if os.path.exists(temp):
+            os.unlink(temp)
 
 def collect(project, server_load_confirmed=False):
     if current(project) == "READY":
@@ -87,23 +120,21 @@ def collect(project, server_load_confirmed=False):
     destination(project)
     if read_key(target).strip():
         return "READY"
-    old_ignore = ignore.read_text() if ignore.exists() else ""
-    check = subprocess.run(["git","-C",str(root),"check-ignore","--quiet",FILE_NAME],capture_output=True)
-    if check.returncode:
-        ignore.write_text(old_ignore + ("\n" if old_ignore and not old_ignore.endswith("\n") else "") + "/"+FILE_NAME+"\n")
-    fd, temp = tempfile.mkstemp(prefix=".hr-key-",dir=root)
-    try:
-        os.fchmod(fd,0o600)
-        with os.fdopen(fd,"w") as f:
-            f.write(ENV_NAME+"="+value+"\n")
-            f.flush()
-            os.fsync(f.fileno())
-        # No plaintext tempfile remains after success/failure.
-        os.replace(temp,target)
-    finally:
-        if os.path.exists(temp):
-            os.unlink(temp)
+    write_key(root, target, ignore, value)
     return "KEY_SAVED"
+
+def replace(project, server_load_confirmed=False):
+    if not server_load_confirmed:
+        return "UNSAFE_DESTINATION"
+    root, target, ignore = destination(project)
+    status, value = prompt()
+    if status != "KEY_SAVED":
+        return status
+    if not isinstance(value,str) or not re.fullmatch(r"sk-hr-[A-Za-z0-9_-]{8,}",value):
+        return "INVALID_FORMAT"
+    destination(project)
+    write_key(root, target, ignore, value)
+    return "KEY_REPLACED"
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self,*args,**kwargs):
@@ -139,20 +170,21 @@ def verify(project):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("action", choices=["check","collect","verify"])
+    p.add_argument("action", choices=["check","collect","replace","verify"])
     p.add_argument("--project",required=True)
     p.add_argument("--server-load-confirmed",action="store_true")
     a = p.parse_args()
     try:
         status = current(a.project) if a.action=="check" else (
-            collect(a.project,a.server_load_confirmed) if a.action=="collect" else verify(a.project))
+            collect(a.project,a.server_load_confirmed) if a.action=="collect" else (
+                replace(a.project,a.server_load_confirmed) if a.action=="replace" else verify(a.project)))
     except ValueError:
         status = "UNSAFE_DESTINATION"
     except Exception:
         # Never print exception text: transports and files may include secret-bearing content.
-        status = "SAVE_FAILED" if a.action=="collect" else "CONNECTION_UNAVAILABLE"
+        status = "SAVE_FAILED" if a.action in ("collect","replace") else "CONNECTION_UNAVAILABLE"
     print(json.dumps({"status":status}))
-    return 0 if status in ("READY","MISSING","KEY_SAVED","CONNECTED","CANCELLED") else 2
+    return 0 if status in ("READY","MISSING","KEY_SAVED","KEY_REPLACED","CONNECTED","CANCELLED") else 2
 
 if __name__ == "__main__":
     raise SystemExit(main())

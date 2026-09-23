@@ -1,0 +1,17 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "harnessrouter",
+  "version": "0.2.0-dev.2",
+  "description": "Build new agentic features on HarnessRouter Cloud or migrate existing ones to it.",
+  "author": {
+    "name": "HarnessRouter"
+  },
+  "homepage": "https://harnessrouter.ai",
+  "repository": "https://github.com/HarnessRouter/plugins",
+  "keywords": [
+    "agents",
+    "agentic-features",
+    "cloud",
+    "migration"
+  ]
+}

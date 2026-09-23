@@ -9,19 +9,26 @@ Ordinary Codex question tools and Claude Code AskUserQuestion return answers to 
 Use them for provider/workspace choice, never API keys. Masking alone does not establish
 transcript exclusion or direct delivery into secret storage.
 
-1. Check presence in the selected server environment without printing values. Reuse existing
-   non-empty credentials. Do not erase/rotate them during onboarding.
-2. Prefer a real host secret tool only when it stores directly and returns non-secret status.
-3. On a macOS coding host, use the reviewed `scripts/key_setup.py` via the agent execution tool.
-   Run `check`, then `collect` only if missing. Supply `--server-load-confirmed` only AFTER
-   verifying the server loads `.env.harnessrouter`. The helper captures the native hidden-answer
-   dialog inside its process. Do not print osascript output or invent a different wrapper.
-4. Other hosts use their own Secrets UI or a trusted editor for a verified ignored server env
-   file. Do not read or screenshot that editor after it contains a key.
-5. Headless/CI without a trusted store returns unavailable/waiting and continues unauthenticated
-   work. Cancel stops this acquisition; never open another prompt automatically after cancel.
+1. Prefer an installed HarnessRouter OAuth connection or a real host secret-input tool when it
+   stores credentials directly and returns only non-secret status. Do not claim either capability
+   exists unless the host exposes it.
+2. Otherwise run `scripts/key_setup.py check --project <project>` without printing values. Reuse an
+   existing non-empty credential.
+3. When the result is `MISSING` on a macOS coding host, first verify that the product server loads
+   `.env.harnessrouter`. Then immediately run `collect --server-load-confirmed`. The helper opens a
+   native hidden-entry modal, accepts the key inside its own process, and writes the ignored
+   owner-only server file. The user must never be asked to edit that file manually.
+4. After `UNAUTHORIZED`, explain that the saved key was rejected. With the user's correction
+   request, run `replace --server-load-confirmed`; it opens the same modal and preserves the old key
+   if the user cancels or input validation fails.
+5. Never pass the key in command arguments, stdin, ordinary question tools, chat, screenshots, or
+   tool output. Do not print `osascript` output or invent a shell wrapper around the helper.
+6. A host without OAuth, a trusted secret tool, or the supported native modal returns
+   `INPUT_UNAVAILABLE`. Continue unauthenticated implementation work and report that secure input is
+   required. Do not fall back to asking the user to edit an environment file.
+7. Cancel stops acquisition. Never open another prompt automatically after cancel.
 
-States: READY, MISSING, KEY_SAVED, CANCELLED, INPUT_UNAVAILABLE, INVALID_FORMAT,
+States: READY, MISSING, KEY_SAVED, KEY_REPLACED, CANCELLED, INPUT_UNAVAILABLE, INVALID_FORMAT,
 UNSAFE_DESTINATION, SAVE_FAILED. KEY_SAVED is not CONNECTED.
 Use the bundled helper's `verify` for its file/process store; other stores require equivalent
 fixed-origin read-only verification in their trusted process.
@@ -41,9 +48,11 @@ Files must be server-only, ignored, untracked, non-symlink and owner-only. Never
 as shell code. No key in tool arguments/results, chat, screenshots, logs, frontend, instructions,
 runtime input or artifacts. Transient Python memory is not guaranteed cryptographic erasure.
 
-## Future adapter
+## Public-plugin authentication direction
 
-MCP form elicitation cannot collect API keys. URL elicitation can open a trusted HTTPS flow,
-but needs an installed MCP server, compatible host, deployed auth service and verified destination.
-SKILL.md creates none of these. Do not invent endpoints or claim this adapter is deployed.
-Accepting the URL dialog is not authorization completion; await verified completion.
+The private coding-host candidate currently has a reviewed macOS native modal. A public
+cross-platform Plugin should use a deployed HarnessRouter MCP server with OAuth account linking and
+host-owned authentication UI instead of collecting an API key through plugin inputs or UI. This
+repository does not yet include that MCP server or OAuth service. Do not invent endpoints or claim
+the public flow is deployed. Treat OAuth implementation and clean-host verification as a release
+gate.

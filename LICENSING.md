@@ -1,6 +1,6 @@
 # HarnessRouter Plugins licensing
 
-Versioned licensing map for the private development candidate 0.1.0-dev.3, dated 2026-09-10. Public release still requires owner approval; the license text is complete and the scopes below apply to this candidate. Earlier copies retain their earlier terms.
+Versioned licensing map for the private development candidate 0.2.0-dev.2, dated 2026-09-22. Public release still requires owner approval; the license text is complete and the scopes below apply to this candidate. Earlier copies retain their earlier terms.
 
 ## Integration Skill
 
@@ -10,14 +10,14 @@ It permits royalty-free use for installing, connecting, deploying, migrating to 
 
 Licensor: Lumentree Corporation, a California corporation. Contact: contact@harnessrouter.ai. The grant extends only to rights it owns or may license; identifying the entity here does not certify the originality or assignment of every contribution.
 
-Exact scope: [Plugin licensing](plugins/harnessrouter/LICENSING.md) and [Skill file map](plugins/harnessrouter/skills/harnessrouter/LICENSING.md). Only the two named new guides currently use the custom license. Existing Apache content is not reclassified.
+Exact scope: [Plugin licensing](plugins/harnessrouter/LICENSING.md) and [Skill file map](plugins/harnessrouter/skills/harnessrouter/LICENSING.md). Only the named persistent-use guide currently uses the custom license. Existing Apache content is not reclassified.
 
 ## Other repository files
 
 | Paths | Terms |
 | --- | --- |
-| `.agents/plugins/marketplace.json`, `.claude-plugin/marketplace.json` | Apache-2.0, inherited packaging metadata and current edits |
-| `tests/native_plugin_smoke.py` | Apache-2.0, inherited packaging test with license-preservation assertions |
+| `.agents/plugins/marketplace.json`, `.claude-plugin/marketplace.json`, `.cursor-plugin/marketplace.json` | Apache-2.0 packaging metadata |
+| `tests/*.py` | Apache-2.0, packaging and scope tests |
 | `plugins/harnessrouter/**` | Exact component scopes in the linked maps; no blanket license |
 | `LICENSE`, `LICENSING.md`, `LICENSES/**` | May be reproduced to accompany and explain permitted copies; functional material keeps its own terms |
 | `README.md`, `.gitignore`, `tests/VALIDATION.md`, `scripts/sync_licenses.py` | Rights reserved except separate authorization, platform permissions and applicable law |

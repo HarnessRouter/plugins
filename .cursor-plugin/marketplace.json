@@ -1,0 +1,24 @@
+{
+  "name": "harnessrouter",
+  "owner": {
+    "name": "HarnessRouter"
+  },
+  "metadata": {
+    "description": "HarnessRouter plugins for agentic product development"
+  },
+  "plugins": [
+    {
+      "name": "harnessrouter",
+      "source": "plugins/harnessrouter",
+      "description": "Build or migrate agentic features on HarnessRouter Cloud.",
+      "version": "0.2.0-dev.2",
+      "category": "DeveloperTools",
+      "keywords": [
+        "agents",
+        "agentic-features",
+        "cloud",
+        "migration"
+      ]
+    }
+  ]
+}

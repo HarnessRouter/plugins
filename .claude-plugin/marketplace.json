@@ -11,7 +11,7 @@
       "name": "harnessrouter",
       "source": "./plugins/harnessrouter",
       "description": "Build or migrate agentic features on HarnessRouter Cloud.",
-      "version": "0.2.0-dev.1"
+      "version": "0.2.0-dev.2"
     }
   ]
 }
