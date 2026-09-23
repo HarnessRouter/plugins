@@ -1,6 +1,42 @@
 # HarnessRouter Plugins
 
-Private development repository for HarnessRouter plugins. The first HarnessRouter Cloud integration candidate is available; no stable release is available yet. Public visibility and releases require explicit owner approval after testing.
+Plugins that teach a coding agent (Claude Code, Codex, Cursor) how to build agentic products on
+HarnessRouter Cloud. Install once; from then on, ask your coding agent to build or migrate an agent
+feature and it does so on HarnessRouter.
+
+## Install
+
+Claude Code:
+
+```sh
+claude plugin marketplace add HarnessRouter/plugins
+claude plugin install harnessrouter@harnessrouter --scope user
+```
+
+Codex:
+
+```sh
+codex plugin marketplace add https://github.com/HarnessRouter/plugins
+codex plugin add harnessrouter@harnessrouter
+```
+
+Cursor: add `https://github.com/HarnessRouter/plugins` as a marketplace in Cursor's plugin settings
+and install HarnessRouter from it; Cursor can also load the portable plugin folder
+`plugins/harnessrouter` directly.
+
+Then start a new conversation and ask, for example:
+
+- "Build a product-launch video agent on HarnessRouter Cloud."
+- "Add a new HarnessRouter Cloud agent to my existing product."
+- "Migrate this existing agent to HarnessRouter Cloud."
+
+When the plugin needs a HarnessRouter API key, it opens a secure prompt (macOS) or reuses the
+`HR_API_KEY` your project's server already loads; it never asks for the key in chat. Create the key
+under Quickstart in the HarnessRouter console.
+
+Verified 2026-09-23 with Claude Code 2.1.280 and Codex CLI 0.156.1: both install from this
+repository as above and materialize the Skill; a fresh Claude Code session invokes it. A clean
+Cursor installation has not been run by the maintainers yet.
 
 ## Packages
 
@@ -19,31 +55,6 @@ Testing must cover Codex, Claude Code, Cursor, credential input and cancellation
 ## Licensing
 
 This is a mixed-license project. See [LICENSE](LICENSE) and [LICENSING.md](LICENSING.md). The integration license permits free HarnessRouter use, including business and client projects, and reserves other business reuse of identified protected content. Existing Apache content retains its license. See the exact file map before redistribution.
-
-## Private plugin testing
-
-Clone this repository using your authorized GitHub account. From its root, register the checkout and install with the target host:
-
-```sh
-codex plugin marketplace add .
-codex plugin add harnessrouter@harnessrouter
-```
-
-```sh
-claude plugin marketplace add .
-claude plugin install harnessrouter@harnessrouter --scope user
-```
-
-Cursor can load the same portable Agent Plugin from `plugins/harnessrouter/plugin.json`. Import this repository as a marketplace or test the plugin directory through Cursor's supported local-plugin flow. Real clean-host Cursor installation remains a release gate.
-
-Open a new session and try either supported product path:
-
-- “Build this new agentic feature on HarnessRouter Cloud.”
-- “Migrate this existing agent to HarnessRouter Cloud.”
-
-User-scope installation keeps the Skill available across sessions until disabled or uninstalled. Project scope is available in Claude when preferred. Automatic invocation depends on the host exposing the enabled Skill and selecting it for the request; it is not permanent model memory.
-
-Installing the Plugin adds guidance to the coding host. It does not deploy HarnessRouter locally. The Skill always targets HarnessRouter Cloud, automatically chooses between greenfield construction and migration, updates the user's product integration, configures the required Cloud resources, and verifies the end-to-end feature. It never collects keys with an ordinary chat question.
 
 ## Updates and credentials
 
