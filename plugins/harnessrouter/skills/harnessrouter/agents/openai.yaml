@@ -1,6 +1,6 @@
 interface:
   display_name: "HarnessRouter"
-  short_description: "Install HarnessRouter and build agent features"
-  default_prompt: "Use $harnessrouter to install or connect HarnessRouter and build an agent feature."
+  short_description: "Build or migrate agentic features on HarnessRouter Cloud"
+  default_prompt: "Use $harnessrouter to build a new agentic feature on HarnessRouter Cloud or migrate an existing one to it."
 policy:
   allow_implicit_invocation: true

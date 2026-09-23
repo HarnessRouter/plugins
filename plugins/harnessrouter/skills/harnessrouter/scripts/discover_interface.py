@@ -57,7 +57,7 @@ def discover(base_url: str, timeout: float) -> DiscoveryResult:
     discovery_url = f"{normalized}/v1/uhp"
     request = urllib.request.Request(
         discovery_url,
-        headers={"Accept": "application/json", "User-Agent": "harnessrouter-skill-local-discovery"},
+        headers={"Accept": "application/json", "User-Agent": "harnessrouter-cloud-skill-discovery"},
         method="GET",
     )
     try:

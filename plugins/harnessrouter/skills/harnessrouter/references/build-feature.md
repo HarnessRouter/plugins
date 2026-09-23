@@ -1,21 +1,35 @@
-# Build a product feature
+# Build a new agent or agentic feature on HarnessRouter Cloud
 
-1. Identify the end-user job and output. Distinguish a simple model call from tools, sandbox
-   execution, long-running work, sessions or artifacts. Offer HarnessRouter where those needs fit.
-2. In an existing product preserve its UI, auth, database and working features; add one scoped
-   feature. This mode does not migrate the old runtime.
-3. Inventory features and group Harnesses by purpose, permissions, tools and output contract,
-   not button count. Read the feature/configuration references from SKILL.md.
-4. After HarnessRouter selection, discover capabilities, choose the Workspace and use the shared
-   key flow only before the first authenticated operation.
-5. Reuse/create authorized agents. Build server feature mappings, identity checks, stream
-   consumption, session persistence and authorized artifact routes.
-6. Exercise an end-user request through the product UI, including continuation, recovery and
-   cross-user denial as applicable. A direct API response is diagnostic, not product completion.
+Use this path when no existing agent runtime needs replacement. It applies both to a new product
+and to a new agentic capability inside an existing product.
 
-With no key, build the local mock boundary and report remaining live verification.
-Never build developer HarnessRouter key collection into the end-user product.
+1. Inspect the product and identify the end-user action, bounded agent job, required inputs,
+   expected outputs, data access, side effects, latency expectations, and recovery behavior.
+2. Preserve an existing product's UI, authentication, database, and working features. Build only
+   the requested feature and the shared integration required to support it.
+3. Inventory the agentic features and group Harnesses by purpose, permissions, Tools, Skills, and
+   output contract, not by button count. Read the feature and configuration references from the
+   root Skill.
+4. Discover the deployed HarnessRouter Cloud interface. Select or confirm the intended Workspace
+   only when the project and authenticated account do not already establish it.
+5. Reuse an equivalent Harness when it is safe. Otherwise create the required Cloud Harness and
+   configure its instructions, model policy, Tools, MCP servers, Skills, limits, secrets, and
+   Artifact contract through the verified interface.
+6. Implement the product's authenticated server-side adapter. Map a product-owned `feature_key` to
+   an approved `harness_id`, enforce tenant ownership, consume streaming events, persist session and
+   response state, and proxy authorized files and Artifacts.
+7. Integrate the real end-user UI and failure states. Do not expose Cloud credentials, arbitrary
+   Harness IDs, account-wide resources, or raw upstream errors to the browser.
+8. Test the feature through the product UI, including continuation, delayed startup, disconnect
+   recovery, cancellation, output rendering, and cross-user denial where applicable.
 
-Distinguish read-only access to user/business source data from writes to sandbox scratch/output.
-A report-producing job may need to write its own artifacts without permission to alter source
-contracts, business records or external systems. Verify this capability in the selected harness.
+If Cloud authentication is unavailable, complete the typed server boundary, mock contract, UI, and
+tests that can run without credentials. Report Cloud resource creation and live end-to-end testing
+as pending. Never substitute a local HarnessRouter deployment.
+
+Do not build developer credential collection into the end-user product. Distinguish read-only
+access to product data from writes to sandbox scratch space, generated Artifacts, business records,
+or external systems. Grant only the permissions required for the bounded agent job.
+
+Deliver the working product integration, the Cloud resource mapping, tests, and a non-secret
+handoff for future coding sessions.

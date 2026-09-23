@@ -12,7 +12,7 @@ transcript exclusion or direct delivery into secret storage.
 1. Check presence in the selected server environment without printing values. Reuse existing
    non-empty credentials. Do not erase/rotate them during onboarding.
 2. Prefer a real host secret tool only when it stores directly and returns non-secret status.
-3. On local macOS GUI, use the reviewed `scripts/key_setup.py` via the agent execution tool.
+3. On a macOS coding host, use the reviewed `scripts/key_setup.py` via the agent execution tool.
    Run `check`, then `collect` only if missing. Supply `--server-load-confirmed` only AFTER
    verifying the server loads `.env.harnessrouter`. The helper captures the native hidden-answer
    dialog inside its process. Do not print osascript output or invent a different wrapper.

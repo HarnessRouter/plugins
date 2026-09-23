@@ -10,8 +10,8 @@
     {
       "name": "harnessrouter",
       "source": "./plugins/harnessrouter",
-      "description": "Install, connect and reuse HarnessRouter.",
-      "version": "0.1.0-dev.3"
+      "description": "Build or migrate agentic features on HarnessRouter Cloud.",
+      "version": "0.2.0-dev.1"
     }
   ]
 }

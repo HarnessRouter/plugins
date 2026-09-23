@@ -1,6 +1,6 @@
 # HarnessRouter integration Skill: file coverage
 
-Applies to candidate version **0.1.0-dev.3** and this accompanying file set, dated 2026-09-10. It does not replace terms for earlier copies. Paths below are relative to this Skill directory.
+Applies to candidate version **0.2.0-dev.1** and this accompanying file set, dated 2026-09-22. It does not replace terms for earlier copies. Paths below are relative to this Skill directory.
 
 ## HarnessRouter Integration Skill License 1.0
 
@@ -8,7 +8,6 @@ Licensor: **Lumentree Corporation, a California corporation**. Contact: **contac
 
 Complete text: [HarnessRouter Integration Skill License 1.0](LICENSES/LicenseRef-HarnessRouter-Integration-Skill-1.0.txt).
 
-- `references/setup-local.md`
 - `references/persistent-use.md`
 
 Integration with HarnessRouter is royalty-free for individuals and organizations, including paid client projects. Copying or adapting covered content for other business purposes, and reserved standalone redistribution, require separate permission. The complete text controls.
@@ -23,7 +22,6 @@ Complete text: [Apache-2.0](LICENSES/Apache-2.0.txt).
 - `references/agent-features-and-harnesses.md`
 - `references/build-feature.md`
 - `references/files-artifacts-and-rendering.md`
-- `references/import-local-agent.md`
 - `references/key-setup.md`
 - `references/migrate-runtime.md`
 - `references/runtime-integration.md`

@@ -1,22 +1,22 @@
 {
   "name": "harnessrouter",
-  "version": "0.1.0-dev.3",
-  "description": "Install and connect HarnessRouter, then reuse it for agent features and migrations.",
+  "version": "0.2.0-dev.1",
+  "description": "Build new agentic features on HarnessRouter Cloud or migrate existing ones to it.",
   "author": {
     "name": "HarnessRouter"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "HarnessRouter",
-    "shortDescription": "Install and connect HarnessRouter, then reuse it for agent features and migrations.",
-    "longDescription": "Install and connect HarnessRouter, then reuse it for agent features and migrations.",
+    "shortDescription": "Build or migrate agentic features on HarnessRouter Cloud.",
+    "longDescription": "Automatically build new agents and agentic features on HarnessRouter Cloud, or migrate existing agent runtimes and features to HarnessRouter Cloud.",
     "developerName": "HarnessRouter",
     "category": "DeveloperTools",
     "capabilities": [],
     "defaultPrompt": [
-      "Install HarnessRouter locally and help me run my first task.",
-      "Connect my existing HarnessRouter instance.",
-      "Build an agent feature with HarnessRouter."
+      "Build this new agentic feature on HarnessRouter Cloud.",
+      "Add a new HarnessRouter Cloud agent to my existing product.",
+      "Migrate this existing agent to HarnessRouter Cloud."
     ]
   }
 }

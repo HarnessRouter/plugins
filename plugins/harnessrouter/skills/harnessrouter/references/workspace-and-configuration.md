@@ -23,7 +23,7 @@ operations require isolation. Use a Workspace-scoped API key.
 
 In UHP mode, use the discovery document's capability flags before exposing optional product
 behavior. In Hosted Compatibility mode, use only the routes documented in this Skill and verified
-by the local contract test. Vendor-only routes such as base catalogs, Kits, integrations, traces,
+against the deployed Cloud contract. Vendor-only routes such as base catalogs, Kits, integrations, traces,
 or sharing are not portable UHP capabilities and must not be inferred from a future-looking source
 checkout.
 

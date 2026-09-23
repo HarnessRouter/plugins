@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Local macOS candidate. Return status only; never include key data in arguments or output."""
+"""HarnessRouter Cloud credential helper for macOS. Return status only; never expose key data."""
 import argparse
 import json
 import os
