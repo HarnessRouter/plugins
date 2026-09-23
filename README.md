@@ -6,18 +6,18 @@ feature and it does so on HarnessRouter.
 
 ## Install
 
-Claude Code:
-
-```sh
-claude plugin marketplace add HarnessRouter/plugins
-claude plugin install harnessrouter@harnessrouter --scope user
-```
-
 Codex:
 
 ```sh
 codex plugin marketplace add https://github.com/HarnessRouter/plugins
 codex plugin add harnessrouter@harnessrouter
+```
+
+Claude Code:
+
+```sh
+claude plugin marketplace add HarnessRouter/plugins
+claude plugin install harnessrouter@harnessrouter --scope user
 ```
 
 Cursor: add `https://github.com/HarnessRouter/plugins` as a marketplace in Cursor's plugin settings
