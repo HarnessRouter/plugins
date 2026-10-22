@@ -14,10 +14,15 @@ being replaced or moved. Adding a new feature to an existing product belongs to 
 3. Choose one staging boundary. Preserve the old runtime behind a provider adapter or feature flag
    and define measurable quality, latency, cost, reliability, security, and rollback criteria from
    the baseline.
-4. Discover the deployed HarnessRouter Cloud interface and authenticate through the shared key
-   flow. Reuse or create the staging Workspace and Harnesses required by the compatibility map.
-   Recreate permissions explicitly. Never copy credential values into instructions or code.
-5. Implement the HarnessRouter Cloud adapter behind the existing product contract where practical.
+4. Run `scripts/check_contract.py`, then authenticate through the key flow
+   ([key-setup.md](key-setup.md)); use a key made for the staging Workspace. Reuse or create the
+   Harnesses the compatibility map requires, choosing bases and models from
+   [agent-features-and-harnesses.md](agent-features-and-harnesses.md) unless the baseline's model
+   must be kept. Recreate permissions explicitly. Never copy credential values into instructions
+   or code.
+5. Implement the HarnessRouter Cloud adapter behind the existing product contract where practical,
+   starting from a template (`templates/node/harnessrouter.ts` or
+   `templates/python/harnessrouter.py`) and the contracts in [api-reference.md](api-reference.md).
    Map product users, tenants, features, sessions, files, and outputs to Cloud identifiers without
    exposing account-wide resources. Old runtime session IDs are not HarnessRouter IDs, and old
    histories are not uploaded by default.

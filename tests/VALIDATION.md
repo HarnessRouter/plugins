@@ -21,3 +21,18 @@ Skill and Plugin schema validation, portable manifest and Cursor catalog structu
 The macOS key helper passed non-secret fixture tests for hidden modal invocation, first-time collection, owner-only storage, ignored-file setup, explicit replacement, and cancellation preserving the prior value. No real API key was used. Cursor's portable Agent Plugin and marketplace shapes are present, but a clean Cursor installation has not yet been run.
 
 Live automatic invocation, a human-operated GUI credential-entry check, authenticated Cloud configuration, clean-host Cursor installation, cross-host upgrade behavior, greenfield end-to-end execution, and migration cutover remain release gates.
+
+## Self-contained Skill, 0.3.0-dev.1 (2026-10-21)
+
+Every contract the Skill documents was exercised on `https://api.harnessrouter.ai` with
+`UHP-Version: 2026-09-28` using a test key that was revoked afterwards.
+
+- `python3 -m unittest tests/test_cloud_scope.py tests/test_key_setup.py tests/test_check_contract.py tests/test_templates.py tests/test_harness_config.py`: passed (exit 0). `tests/test_templates.py` runs the Python template suite and, on Node 22.18+, the Node suite.
+- `node --test templates/node/harnessrouter.test.ts`: 13 passed; `python3 -m unittest templates/python/test_harnessrouter.py`: 13 passed; the Node template type-checks under `tsc --strict` with `erasableSyntaxOnly`.
+- `scripts/check_contract.py` live: exit 0 without a key and with one, no drift, every recommended pairing available.
+- `templates/node/e2e.ts` and `templates/python/e2e.py` live: one real streamed task each, all checks passed (ids at `response.created`, recovery by polling, file list, signed preview, download).
+- `scripts/harness_config.py` live: create, reuse by name, and an update that kept a Skill bundle, budgets and headers.
+- `tests/native_plugin_smoke.py`: Codex CLI 0.156.1 and Claude Code 2.1.306 plugin managers installed the candidate from a local marketplace, materialized the exact Skill and licenses, and uninstalled (exit 0).
+- Fresh-agent test: a headless Claude Code run with only this Skill built a working support-reply drafter from an empty folder without fetching any harnessrouter.ai page, inspecting sessions or asking a question.
+
+Not validated: Codex and Cursor fresh-agent runs, a human-operated GUI key entry, PPTX/XLSX `/pdf`, a forced `failed` task.

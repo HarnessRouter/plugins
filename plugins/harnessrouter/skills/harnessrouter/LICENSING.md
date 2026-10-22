@@ -1,6 +1,6 @@
 # HarnessRouter integration Skill: file coverage
 
-Applies to candidate version **0.2.0-dev.2** and this accompanying file set, dated 2026-09-22. It does not replace terms for earlier copies. Paths below are relative to this Skill directory.
+Applies to candidate version **0.3.0-dev.1** and this accompanying file set, dated 2026-10-21. It does not replace terms for earlier copies. Paths below are relative to this Skill directory.
 
 ## HarnessRouter Integration Skill License 1.0
 
@@ -9,6 +9,9 @@ Licensor: **Lumentree Corporation, a California corporation**. Contact: **contac
 Complete text: [HarnessRouter Integration Skill License 1.0](LICENSES/LicenseRef-HarnessRouter-Integration-Skill-1.0.txt).
 
 - `references/persistent-use.md`
+- `references/api-reference.md`
+- `scripts/check_contract.py`
+- `scripts/harness_config.py`
 
 Integration with HarnessRouter is royalty-free for individuals and organizations, including paid client projects. Copying or adapting covered content for other business purposes, and reserved standalone redistribution, require separate permission. The complete text controls.
 
@@ -28,10 +31,15 @@ Complete text: [Apache-2.0](LICENSES/Apache-2.0.txt).
 - `references/security-and-testing.md`
 - `references/self-update.md`
 - `references/workspace-and-configuration.md`
-- `scripts/discover_interface.py`
 - `scripts/key_setup.py`
+- `templates/node/harnessrouter.ts`
+- `templates/node/harnessrouter.test.ts`
+- `templates/node/e2e.ts`
+- `templates/python/harnessrouter.py`
+- `templates/python/test_harnessrouter.py`
+- `templates/python/e2e.py`
 
-These files retain Apache-2.0, including the current edits to their entrypoint and discovery metadata. No custom restriction applies to their underlying or currently listed Apache content. The custom guides they reference retain their separate license. See [NOTICE.md](NOTICE.md) for provenance.
+The inherited files retain Apache-2.0, including the current edits to their entrypoint and discovery metadata. The Node and Python server templates are new files licensed under Apache-2.0, so they can be copied into a product as they are. No custom restriction applies to their underlying or currently listed Apache content. The custom guides they reference retain their separate license. See [NOTICE.md](NOTICE.md) for provenance.
 
 ## Licensing documents and unlisted files
 

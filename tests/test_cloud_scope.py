@@ -20,7 +20,7 @@ class CloudScopeTest(unittest.TestCase):
         marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
         cursor = json.loads((ROOT / ".cursor-plugin" / "marketplace.json").read_text())
         portable = json.loads((PLUGIN / "plugin.json").read_text())
-        self.assertEqual(version, "0.2.0-dev.2")
+        self.assertEqual(version, "0.3.0-dev.1")
         self.assertEqual(portable["version"], version)
         self.assertEqual(codex["version"], version)
         self.assertEqual(claude["version"], version)
@@ -79,6 +79,42 @@ class CloudScopeTest(unittest.TestCase):
                 path = (source.parent / target.split("#", 1)[0]).resolve()
                 if not path.exists():
                     failures.append(f"{source.name}: {target}")
+        self.assertEqual(failures, [])
+
+    def test_skill_is_self_contained(self):
+        """No workflow step may depend on a harnessrouter.ai page; only the API host is called."""
+        texts = [p for p in SKILL_ROOT.rglob("*") if p.suffix in (".md", ".py", ".ts") and "LICENSES" not in p.parts]
+        failures = []
+        for path in texts:
+            for n, line in enumerate(path.read_text().splitlines(), 1):
+                for url in re.findall(r"https?://[^\s)'\"`>]+", line):
+                    host = re.sub(r"^https?://", "", url).split("/")[0]
+                    if host.endswith("harnessrouter.ai") and host != "api.harnessrouter.ai" and "further reading" not in line.lower():
+                        failures.append(f"{path.relative_to(SKILL_ROOT)}:{n}: {url}")
+                if re.search(r"(?<![`/])llms\.txt|/docs/", line) and "do not fetch" not in line.lower():
+                    failures.append(f"{path.relative_to(SKILL_ROOT)}:{n}: docs reference")
+        self.assertEqual(failures, [])
+
+    def test_skill_md_is_short_and_links_every_reference_directly(self):
+        skill = (SKILL_ROOT / "SKILL.md").read_text()
+        self.assertLess(len(skill.encode()), 9000)
+        for ref in sorted((SKILL_ROOT / "references").glob("*.md")):
+            self.assertIn(f"references/{ref.name}", skill, ref.name)
+        for code in ["scripts/check_contract.py", "scripts/key_setup.py", "templates/node/", "templates/python/"]:
+            self.assertIn(code, skill)
+        self.assertFalse((SKILL_ROOT / "scripts" / "discover_interface.py").exists())
+
+    def test_every_skill_file_has_license_coverage(self):
+        skill_map = (SKILL_ROOT / "LICENSING.md").read_text()
+        failures = []
+        for path in sorted(SKILL_ROOT.rglob("*")):
+            rel = path.relative_to(SKILL_ROOT).as_posix()
+            if path.is_dir() or rel.startswith("LICENSES/") or "__pycache__" in rel or path.name == ".DS_Store":
+                continue
+            if rel in ("LICENSE", "LICENSING.md", "NOTICE.md"):
+                continue
+            if f"`{rel}`" not in skill_map:
+                failures.append(rel)
         self.assertEqual(failures, [])
 
 

@@ -1,6 +1,6 @@
 # HarnessRouter Plugins licensing
 
-Versioned licensing map for the private development candidate 0.2.0-dev.2, dated 2026-09-22. Public release still requires owner approval; the license text is complete and the scopes below apply to this candidate. Earlier copies retain their earlier terms.
+Versioned licensing map for the development candidate 0.3.0-dev.1, dated 2026-10-21. Public release still requires owner approval; the license text is complete and the scopes below apply to this candidate. Earlier copies retain their earlier terms.
 
 ## Integration Skill
 
@@ -10,7 +10,7 @@ It permits royalty-free use for installing, connecting, deploying, migrating to 
 
 Licensor: Lumentree Corporation, a California corporation. Contact: contact@harnessrouter.ai. The grant extends only to rights it owns or may license; identifying the entity here does not certify the originality or assignment of every contribution.
 
-Exact scope: [Plugin licensing](plugins/harnessrouter/LICENSING.md) and [Skill file map](plugins/harnessrouter/skills/harnessrouter/LICENSING.md). Only the named persistent-use guide currently uses the custom license. Existing Apache content is not reclassified.
+Exact scope: [Plugin licensing](plugins/harnessrouter/LICENSING.md) and [Skill file map](plugins/harnessrouter/skills/harnessrouter/LICENSING.md). The custom license covers only the files the Skill map names under it: the persistent-use guide, the API reference, the contract checker and the Harness configuration script. The Node and Python server templates are Apache-2.0. Existing Apache content is not reclassified.
 
 ## Other repository files
 

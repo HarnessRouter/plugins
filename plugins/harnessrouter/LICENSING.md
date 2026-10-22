@@ -1,6 +1,6 @@
 # HarnessRouter Plugin licensing
 
-Version 0.2.0-dev.2. This is a mixed-license package.
+Version 0.3.0-dev.1. This is a mixed-license package.
 
 The [Skill coverage map](skills/harnessrouter/LICENSING.md) is the authoritative list for all files under `skills/harnessrouter/`. New identified guides use the HarnessRouter Integration Skill License 1.0. Inherited files listed there retain Apache-2.0.
 

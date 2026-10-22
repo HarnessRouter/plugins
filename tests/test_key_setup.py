@@ -2,6 +2,7 @@
 """Verify secure modal-backed key storage without exposing a real credential."""
 
 import importlib.util
+import json
 import os
 from pathlib import Path
 import stat
@@ -71,6 +72,49 @@ class KeySetupTest(unittest.TestCase):
             with mock.patch.object(KEY_SETUP, "prompt", return_value=("CANCELLED", None)):
                 self.assertEqual(KEY_SETUP.replace(project, server_load_confirmed=True), "CANCELLED")
         self.assertIn("existingFixture123", target.read_text())
+
+    def test_preconditions_have_distinct_statuses(self):
+        with tempfile.TemporaryDirectory(prefix="hr-key-nogit-") as plain:
+            with mock.patch.dict(os.environ, {KEY_SETUP.ENV_NAME: ""}):
+                result = KEY_SETUP.run("check", plain, False)
+                self.assertEqual(result["status"], "NOT_A_GIT_REPO")
+                self.assertIn("git init", result["next"])
+                self.assertEqual(KEY_SETUP.run("collect", plain, True)["status"], "NOT_A_GIT_REPO")
+        temporary, project = self.make_project()
+        self.addCleanup(temporary.cleanup)
+        with mock.patch.dict(os.environ, {KEY_SETUP.ENV_NAME: ""}):
+            self.assertEqual(KEY_SETUP.run("check", project, False)["status"], "MISSING")
+            with mock.patch.object(KEY_SETUP, "prompt") as prompt:
+                self.assertEqual(KEY_SETUP.run("collect", project, False)["status"], "SERVER_LOAD_UNCONFIRMED")
+                self.assertEqual(KEY_SETUP.run("replace", project, False)["status"], "SERVER_LOAD_UNCONFIRMED")
+                prompt.assert_not_called()
+            target = project / KEY_SETUP.FILE_NAME
+            target.write_text(f"{KEY_SETUP.ENV_NAME}=sk-hr-fixtureGamma789\n")
+            target.chmod(0o600)
+            subprocess.run(["git", "-C", str(project), "add", "-f", KEY_SETUP.FILE_NAME], check=True)
+            result = KEY_SETUP.run("check", project, False)
+            self.assertEqual((result["status"], result.get("reason")), ("UNSAFE_DESTINATION", "tracked_by_git"))
+
+    def test_non_macos_prompt_is_input_unavailable(self):
+        with mock.patch.object(KEY_SETUP.sys, "platform", "linux"):
+            self.assertEqual(KEY_SETUP.prompt(), ("INPUT_UNAVAILABLE", None))
+
+    def test_verify_reports_workspace_without_printing_the_key(self):
+        temporary, project = self.make_project()
+        self.addCleanup(temporary.cleanup)
+        with mock.patch.dict(os.environ, {KEY_SETUP.ENV_NAME: "sk-hr-fixtureDelta000"}):
+            with mock.patch.object(KEY_SETUP, "http_get", return_value=(200, {"workspace_name": "Default Workspace"})):
+                result = KEY_SETUP.run("verify", project, False)
+            self.assertEqual(result["status"], "CONNECTED")
+            self.assertEqual(result["workspace_name"], "Default Workspace")
+            self.assertNotIn("fixtureDelta", json.dumps(result))
+            with mock.patch.object(KEY_SETUP, "http_get", return_value=(401, None)):
+                self.assertEqual(KEY_SETUP.run("verify", project, False)["status"], "UNAUTHORIZED")
+
+    def test_every_status_is_documented(self):
+        guidance = (SCRIPT.parent.parent / "references" / "key-setup.md").read_text()
+        for status in KEY_SETUP.NEXT:
+            self.assertIn(f"`{status}`", guidance, status)
 
     def test_documentation_forbids_manual_env_edit_fallback(self):
         guidance = (SCRIPT.parent.parent / "references" / "key-setup.md").read_text().lower()

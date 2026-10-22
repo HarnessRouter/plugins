@@ -33,8 +33,11 @@ No terminal needed: paste this into Codex or Claude Code and the agent installs 
 > conversation to use it.
 
 A conversation only sees the plugins it started with (a Claude Code session that installed the
-plugin could not invoke the Skill until a new session, measured 2026-09-23), so start a new
-conversation and ask, for example:
+plugin could not invoke the Skill until a new session, measured 2026-09-23). A coding agent that is
+already working on a task does not need to restart: it may shallow-clone this repository and read
+`plugins/harnessrouter/skills/harnessrouter/SKILL.md` from the clone, which is self-contained, and
+report the Skill's freshness as unverified. For later conversations, install the plugin and ask,
+for example:
 
 - "Build a product-launch video agent on HarnessRouter Cloud."
 - "Add a new HarnessRouter Cloud agent to my existing product."

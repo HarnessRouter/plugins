@@ -1,102 +1,143 @@
 # Workspace and Harness configuration
 
+Request and response shapes are in [api-reference.md](api-reference.md) (Harnesses, Catalog, Tool
+secrets). This file is the procedure.
+
 ## Contents
 
-- Select the Workspace
-- Reuse, create, or update Harnesses
-- Configure instructions
-- Configure Tools and MCP
+- The Workspace is the key's
+- Reuse by name, or create
+- Budgets and defaults
+- Configure instructions, with an output contract template
+- Configure Tools and MCP servers
 - Configure Skills
-- Discover capabilities without inventing support
-- Preserve API conventions
+- Change a Harness later
 
-## Select the Workspace
+## The Workspace is the key's
 
-Use one Workspace as the product/project and environment boundary. Reuse the Workspace that
-represents the intended product and environment; otherwise create one through a documented API or
-the HarnessRouter Dashboard. Do not invent a Workspace endpoint.
+An API key acts in exactly one Workspace. `GET /v1/me` names it (`workspace_name`, for example
+"Default Workspace"). Every Harness and task the key creates lands there. This Skill never creates
+Workspaces: when the product needs a separate one (another customer, staging versus production),
+the user makes it and a key for it in the HarnessRouter console. Keep the key's Workspace in the
+handoff so later sessions use the same one.
 
-Separate products, customers, and environments when their data, credentials, permissions, or
-operations require isolation. Use a Workspace-scoped API key.
+## Reuse by name, or create
 
-## Discover capabilities without inventing support
+1. Plan the Harness (name, purpose, base and model from the table in
+   [agent-features-and-harnesses.md](agent-features-and-harnesses.md), instructions, tools,
+   budgets).
+`scripts/harness_config.py ensure` does steps 2 to 4 and keeps the key out of command lines:
 
-In UHP mode, use the discovery document's capability flags before exposing optional product
-behavior. In Hosted Compatibility mode, use only the routes documented in this Skill and verified
-against the deployed Cloud contract. Vendor-only routes such as base catalogs, Kits, integrations, traces,
-or sharing are not portable UHP capabilities and must not be inferred from a future-looking source
-checkout.
+```bash
+python3 scripts/harness_config.py ensure --project <project> --name "Support replies" \
+  --base hermes --model gpt-5.4 --instructions <project>/harness-instructions.txt
+# {"status": "CREATED", "harness_id": "chrn_…", ...}  or  {"status": "REUSED", ..., "differs_from_request": [...]}
+```
 
-## Reuse, create, or update Harnesses
+By hand:
 
-1. Call `GET /v1/harnesses`.
-2. Compare purpose, instructions, data, Tools/MCP, Skills, permissions, model policy, limits, and
-   output contract with the Harness plan.
-3. Reuse only a genuine match.
-4. Update the canonical Harness only when the change remains compatible with callers.
-5. Otherwise create with `POST /v1/harnesses`.
-6. Persist the returned `harness_id` in server-side product configuration.
-
-Use `GET /v1/models` and `GET /v1/harnesses/{id}/models`; do not permanently hardcode a model name.
-Use `GET | PUT | DELETE /v1/harnesses/{id}` only according to the deployed schema.
-
-## Configure instructions
-
-Define:
-
-1. One runtime job and its allowed inputs.
-2. Out-of-scope work that returns `role_mismatch`, including building the host product.
-3. Allowed data, Tools, external services, and side effects.
-4. Prohibited actions and approval gates.
-5. Exact output and Artifact contract: primary file, supporting files, entry point, relationships,
-   media types, and verification result.
-6. A requirement to save deliverables as real working-directory files.
-7. Completed, incomplete, and failure behavior the product can handle.
-8. A prohibition on secrets and user-facing `localhost` links.
-
-## Configure Tools and MCP
-
-- Enable only the Tools required by the Harness purpose.
-- Prefer read-only and least-privilege access.
-- Store fixed external credentials with `PUT /v1/mcp-secrets/{short-name}`; never embed them.
-- Put consequential writes behind product approval or a separate Harness.
-- Use `additional_headers[]` to declare supported per-request identity header names. Send values only
-  from the authenticated product server and reference them with the deployed `$headers.<Name>`
-  syntax. Never store the values in Harness configuration.
-- Prove Tool discovery and one narrow call. Verify visible handling of missing permission, missing
-  secret, timeout, and downstream failure.
-
-## Configure Skills
-
-Skills are folder bundles:
+2. `GET /v1/harnesses`. If an entry's `name` equals the planned name exactly, reuse its `id`.
+   Compare its `base`, `defaultModel` and `systemPrompt` with the plan and report differences; do
+   not change a Harness the user may have edited without saying so.
+3. Otherwise `POST /v1/harnesses`:
 
 ```json
 {
-  "name": "contract-review",
-  "files": [
-    {"path": "SKILL.md", "content": "---\nname: contract-review\ndescription: ...\n---\n..."},
-    {"path": "references/rubric.md", "content": "..."}
-  ]
+  "name": "Support replies",
+  "base": "hermes",
+  "default_model": "gpt-5.4",
+  "system_prompt": "<instructions from the template below>",
+  "mcp_servers": [],
+  "skills": []
 }
 ```
 
-Preserve relative paths and use `content_b64` for binary files. The root `SKILL.md` requires YAML
-`name` and `description`. Install only purpose-required Skills.
+4. Store the returned `id` in server configuration (not in browser code) and in `harnessrouter.json`
+   ([persistent-use.md](persistent-use.md)).
 
-Large bundles can round-trip as opaque `{name, enabled, blob}` entries. Preserve these unchanged
-when updating unrelated configuration. Read actual files with
-`GET /v1/harnesses/{id}/skills/{name}/files` before editing or verification. Do not assume that
-every base Harness exposes an enumerable set of built-in document Skills. Inspect the selected
-server's capability metadata and configured Harness, then verify behavior with a representative
-task rather than relying on a plausible Skill name or file presence alone.
+A `422 model_not_available` lists the models the base offers in `error.detail.offered`; pick from
+the table's fallbacks rather than from that list at random.
 
-## Preserve API conventions
+## Budgets and defaults
 
-- Requests use snake_case such as `default_model`, `mcp_servers`, and `max_step`.
-- Stored Harness responses use camelCase such as `defaultModel`, `mcpServers`, and `maxStep`.
-- Do not copy response objects directly into update requests.
-- Retrieve and preserve every field not intentionally changed. A partial UI model must not erase
-  Tools, Skills, headers, secret references, limits, or model policy.
-- Null `maxStep` or `timeoutSeconds` uses runtime defaults. Confirm the current values from deployed
-  capability metadata before enforcing them as product policy.
-- Treat the deployed schema as exact truth; treat this reference as workflow guidance.
+| Request field | Harness field | Default when `null` (`runtimeDefaults` in `GET /v1/bases`) |
+|---|---|---|
+| `max_step` | `maxStep` | 400 steps |
+| `timeout_seconds` | `timeoutSeconds` | 7200 seconds |
+| `max_cost_usd` | `maxCostUsd` | 10 USD per task |
+
+The defaults above were read on 2026-10-21; read `runtimeDefaults` again before enforcing them as
+product policy. A task that hits a step or time budget ends `incomplete` with
+`incomplete_details.reason` `max_steps` or `timeout`. Set budgets that fit the job (a support reply
+needs far fewer than 400 steps), and send per-task values in the request when one user action
+needs a tighter cap.
+
+## Configure instructions, with an output contract template
+
+The Harness's `system_prompt` holds the standing instructions; the product sends only the user's
+input per task. Cover:
+
+1. The one runtime job, who sends requests and what one request contains.
+2. Out-of-scope requests (including "build me an app"): answer `role_mismatch` on the first line.
+3. Allowed data, tools, external services and side effects; prohibited actions.
+4. The exact output contract: folder, entry point, manifest, relative links.
+5. That deliverables are real files in the working directory, never only chat text.
+6. What to do when the request is unclear, unsafe or impossible.
+7. No secrets and no `localhost`, `file://` or absolute links in anything a user sees.
+
+Template (replace the angle brackets; keep the structure):
+
+```text
+You are the <job> for <product>. Each request is one end user's <what they send>.
+
+Deliverables
+- Write every deliverable under ./<out>/ in your working directory. The entry point is
+  ./<out>/<entry file> (for example index.html or reply.md).
+- Use relative links only between files. Never use localhost, file:// or absolute paths.
+- Last, write ./<out>/manifest.json:
+  {"title": "<short title>", "entry": "<entry file>", "pages": ["<file>", ...],
+   "files": ["<every file under ./<out>/>"], "summary": "<one or two sentences for the user>",
+   "verified": true|false}
+  Set "verified" to true only after you opened every file you wrote and checked the links resolve.
+
+Scope
+- If the request is not <job>, write nothing and reply with the first line role_mismatch,
+  then one plain sentence saying what you can do.
+- <data you may use, tools you may call, actions you must never take>
+
+Reply
+- After the files are written, reply with one short line for the user. Never include secrets.
+```
+
+The product reads `manifest.json` for the title and summary, renders `entry`, and treats a
+`role_mismatch` first line as a polite refusal state.
+
+## Configure Tools and MCP servers
+
+- Enable only what the job needs; prefer read-only access.
+- Store a tool credential with `PUT /v1/mcp-secrets/{name}` (body `{"token": "..."}`), then name it
+  in the server entry: `{"name": "docs", "url": "https://...", "auth": "<the ref the store call returned>"}`.
+  Never write a credential into `system_prompt`, `env` or code.
+- Per-user identity from the product: list the header name in `additional_headers` (for example
+  `["X-End-User"]`), reference it in a server entry as `"headers": {"x-user": "$headers.X-End-User"}`,
+  and send the header only from the authenticated product server.
+- Put consequential writes (email, payments, publishing) behind a product approval step or a
+  separate Harness.
+- Prove the tool with one narrow real task and check the product's handling of a missing
+  permission, a timeout and a downstream failure.
+
+## Configure Skills
+
+A Skill is a folder bundle in the Harness's `skills` list:
+`{"name": "reply-style", "files": [{"path": "SKILL.md", "content": "---\nname: ...\ndescription: ...\n---\n..."}]}`.
+Paths are relative; binary files use `content_b64`. Read what is stored with
+`GET /v1/harnesses/{id}/skills/{name}/files`. A base's built-in skills are listed in
+`GET /v1/bases` (`builtinSkills`); do not assume one exists without seeing it there, and verify a
+skill's effect with a representative task.
+
+## Change a Harness later
+
+`PUT /v1/harnesses/{id}` replaces the whole Harness: any field left out is reset (a `PUT` with only
+`name` and `base` cleared the instructions and model). Follow the fetch, update, `PUT`, re-read
+procedure in [persistent-use.md](persistent-use.md), with `If-Match`. `base` cannot change (`409
+harness_mismatch`): create a new Harness for a different base and switch the server's mapping.
