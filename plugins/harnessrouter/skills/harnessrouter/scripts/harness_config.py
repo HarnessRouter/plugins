@@ -3,9 +3,12 @@
 """Create, reuse or change a Harness and keep harnessrouter.json in step. The key is read from
 HR_API_KEY or <project>/.env.harnessrouter and never printed or passed in argv.
 
-  ensure --project P --name N --base B --model M --instructions FILE [--feature-key K]
+  ensure --project P --name N --base B --model M --instructions FILE [--feature-key K] [--memory auto|none]
       Reuse the Harness whose name equals N exactly, else create it (after checking in
-      GET /v1/bases that M is available on B). Writes harnessrouter.json.
+      GET /v1/bases that M is available on B). Writes harnessrouter.json. A create sends
+      `memory` (default auto) only when discovery reports `memories`, and prints the service's
+      {engine, scope, reason}; a service without memory gets one `note`, never a failure.
+      A reuse never changes memory; it prints what the agent has, when the service says.
   update --project P --harness-id ID [--name N] [--model M] [--instructions FILE]
       GET (ETag) -> compare with harnessrouter.json -> full snake_case PUT with If-Match built
       from the live record plus the change -> GET again and compare. Writes harnessrouter.json.
@@ -90,7 +93,32 @@ def model_check(hr, base: str, model: str) -> tuple[str, dict]:
     return "OK", {}
 
 
-def ensure(hr, project: Path, name: str, base: str, model: str, instructions: str, feature_key: str | None) -> tuple[dict, int]:
+NO_MEMORY_NOTE = "This service does not provision memory yet, so the agent was created without it. Nothing else changes."
+
+
+def memories_offered(hr) -> bool:
+    """Discovery (GET /v1/uhp) reports capabilities.memories true. Unreadable counts as no."""
+    try:
+        doc = hr.request("GET", "/v1/uhp")
+    except (hrm.HRError, OSError, ValueError):
+        return False
+    caps = doc.get("capabilities") if isinstance(doc, dict) else None
+    return isinstance(caps, dict) and caps.get("memories") is True
+
+
+def memory_view(h: dict) -> dict | None:
+    """The service's {engine, scope, reason} from a Harness answer, or None when it says nothing of memory."""
+    m = h.get("memory")
+    if isinstance(m, dict):
+        return {"engine": m.get("engine"), "scope": m.get("scope"), "reason": m.get("reason")}
+    reason = h.get("memory_reason", h.get("memoryReason"))
+    if "memory" in h or reason is not None:      # memory: null, plus one sentence of why
+        return {"engine": None, "scope": None, "reason": reason}
+    return None
+
+
+def ensure(hr, project: Path, name: str, base: str, model: str, instructions: str, feature_key: str | None,
+           memory: str = "auto") -> tuple[dict, int]:
     found = hr.find_harness_by_name(name)
     if found:
         prior = handoff_entry(project, found["id"])
@@ -98,16 +126,29 @@ def ensure(hr, project: Path, name: str, base: str, model: str, instructions: st
         diffs = [k for k, v in (("base", base), ("model", model), ("instructions", instructions))
                  if v != {"base": found.get("base"), "model": found.get("defaultModel"), "instructions": found.get("systemPrompt")}[k]]
         write_handoff(project, entry_from_live(found, feature_key))
-        return {"status": "REUSED", "harness_id": found["id"], "name": name, "base": found.get("base"),
-                "model": found.get("defaultModel"), "differs_from_request": diffs}, 0
+        out = {"status": "REUSED", "harness_id": found["id"], "name": name, "base": found.get("base"),
+               "model": found.get("defaultModel"), "differs_from_request": diffs}
+        view = memory_view(found)            # reuse never changes memory; it reports what the agent has
+        if view is not None:
+            out["memory"] = view
+        return out, 0
     status, extra = model_check(hr, base, model)
     if status != "OK":
         return {"status": status, **extra}, 2
-    created = hr.create_harness({"name": name, "base": base, "default_model": model, "system_prompt": instructions,
-                                 "mcp_servers": [], "skills": []})
+    body = {"name": name, "base": base, "default_model": model, "system_prompt": instructions,
+            "mcp_servers": [], "skills": []}
+    if memories_offered(hr):
+        body["memory"] = memory           # "auto" or "none" only: the service chooses the engine
+    created = hr.create_harness(body)
     write_handoff(project, entry_from_live(created, feature_key))
-    return {"status": "CREATED", "harness_id": created["id"], "name": created.get("name"), "base": created.get("base"),
-            "model": created.get("defaultModel")}, 0
+    out = {"status": "CREATED", "harness_id": created["id"], "name": created.get("name"), "base": created.get("base"),
+           "model": created.get("defaultModel")}
+    view = memory_view(created) if "memory" in body else None
+    if view is not None:
+        out["memory"] = view
+    elif memory == "auto":
+        out["note"] = NO_MEMORY_NOTE
+    return out, 0
 
 
 def update(hr, project: Path, harness_id: str, changes: dict) -> tuple[dict, int]:
@@ -148,6 +189,8 @@ def main(argv=None) -> int:
     ap.add_argument("--name"); ap.add_argument("--base"); ap.add_argument("--model")
     ap.add_argument("--instructions", help="a file holding the standing instructions")
     ap.add_argument("--feature-key"); ap.add_argument("--harness-id")
+    ap.add_argument("--memory", choices=["auto", "none"], default="auto",
+                    help="ensure: the plan's Memory line; the service chooses the engine")
     a = ap.parse_args(argv)
     project = Path(a.project).resolve()
     instructions = Path(a.instructions).read_text().strip() if a.instructions else None
@@ -156,7 +199,7 @@ def main(argv=None) -> int:
         if a.action == "ensure":
             if not (a.name and a.base and a.model and instructions):
                 ap.error("ensure needs --name, --base, --model and --instructions")
-            out, code = ensure(hr, project, a.name, a.base, a.model, instructions, a.feature_key)
+            out, code = ensure(hr, project, a.name, a.base, a.model, instructions, a.feature_key, a.memory)
         elif a.action == "update":
             if not a.harness_id:
                 ap.error("update needs --harness-id")

@@ -20,7 +20,7 @@ class CloudScopeTest(unittest.TestCase):
         marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
         cursor = json.loads((ROOT / ".cursor-plugin" / "marketplace.json").read_text())
         portable = json.loads((PLUGIN / "plugin.json").read_text())
-        self.assertEqual(version, "0.3.0-dev.1")
+        self.assertEqual(version, "0.3.0-dev.2")
         self.assertEqual(portable["version"], version)
         self.assertEqual(codex["version"], version)
         self.assertEqual(claude["version"], version)
@@ -68,6 +68,23 @@ class CloudScopeTest(unittest.TestCase):
             self.assertNotIn(forbidden, surfaces)
         self.assertIn("always cloud", surfaces)
         self.assertIn("never substitute a local harnessrouter deployment", surfaces)
+
+    def test_self_hosted_memory_is_a_path_not_a_pitch(self):
+        guide = (SKILL_ROOT / "references" / "self-hosted-memory.md").read_text()
+        self.assertIn("already runs their own HarnessRouter server", guide)
+        self.assertIn("never suggest self-hosting", guide)
+        self.assertLess(len(guide.splitlines()), 40)
+        skill = (SKILL_ROOT / "SKILL.md").read_text()
+        self.assertIn("do not offer Docker, Community Edition, self-hosting", " ".join(skill.split()))
+        self.assertIn("Only when the user already runs their own HarnessRouter server", skill)
+
+    def test_memory_guidance_names_no_internal_systems(self):
+        """Cloud memory is "HarnessRouter memory"; its internals and switches stay out of the Skill."""
+        forbidden = re.compile(r"contextual ?graph|HR_MEMORY_ENGINE|vault", re.I)
+        failures = [f"{p.relative_to(SKILL_ROOT)}:{n}" for p in SKILL_ROOT.rglob("*")
+                    if p.suffix in (".md", ".py", ".ts") and "LICENSES" not in p.parts
+                    for n, line in enumerate(p.read_text().splitlines(), 1) if forbidden.search(line)]
+        self.assertEqual(failures, [])
 
     def test_skill_relative_markdown_links_resolve(self):
         markdown_files = [SKILL_ROOT / "SKILL.md", *sorted((SKILL_ROOT / "references").glob("*.md"))]

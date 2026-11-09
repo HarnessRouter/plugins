@@ -166,6 +166,9 @@ export interface TaskInput {
   previousResponseId?: string;
   sessionId?: string;
   idempotencyKey?: string;
+  /** the product's own id for the signed-in person this task serves, on every task and follow-up.
+   *  Memory is kept separately per person by it; never take it from the user's input. */
+  user?: string;
   maxStep?: number; timeoutSeconds?: number; maxCostUsd?: number;
 }
 export interface StreamHooks {
@@ -235,6 +238,7 @@ export class HarnessRouter {
     const metadata: Record<string, string> = { harness_id: t.harnessId };
     if (t.sessionId) metadata.session_id = t.sessionId;
     const body: Record<string, unknown> = { input: t.input, metadata };
+    if (t.user) body.user = t.user;
     if (t.previousResponseId) body.previous_response_id = t.previousResponseId;
     if (t.maxStep) body.max_step = t.maxStep;
     if (t.timeoutSeconds) body.timeout_seconds = t.timeoutSeconds;
@@ -361,14 +365,15 @@ async function settle(hr: HarnessRouter, store: TaskStore, rec: TaskRecord, r: H
  * upstream stream to the end even after the browser goes away, persists the ids at
  * response.created and the result at the end. `rec` is the record the route created (status
  * "starting", a fresh idempotencyKey). For a follow-up pass previousResponseId and sessionId from
- * the stored record of the task being continued.
+ * the stored record of the task being continued. rec.userId goes out as the task's `user` every
+ * time (the signed-in person's id from the product's session).
  */
 export async function runTask(hr: HarnessRouter, store: TaskStore, rec: TaskRecord, input: unknown,
   followUp: { previousResponseId?: string; sessionId?: string } = {}): Promise<TaskRecord> {
   await store.put({ ...rec, updatedAt: Date.now() });
   try {
     const r = await hr.runStreamed(
-      { harnessId: rec.harnessId, input, idempotencyKey: rec.idempotencyKey, ...followUp },
+      { harnessId: rec.harnessId, input, idempotencyKey: rec.idempotencyKey, user: rec.userId, ...followUp },
       {
         onIds: async ({ responseId, sessionId }) => {
           rec = { ...rec, responseId, sessionId, status: 'in_progress', updatedAt: Date.now() };

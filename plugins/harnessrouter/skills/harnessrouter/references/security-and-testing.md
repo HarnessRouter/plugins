@@ -34,6 +34,10 @@ authorization only because the owner-checked detail route signed it, it expires,
 task. Forward per-user identity downstream only from an authenticated server route and only
 through headers declared in `additional_headers`.
 
+The task's `user` is the same kind of identity: the server sets it from the signed-in session, as
+the product's own stable id for that person, never from text the person typed or a browser field.
+A wrong or shared `user` hands one person's memory to another.
+
 ## Return safe product data
 
 Turn HarnessRouter answers into the product's own result: visible answer text, sanitized
@@ -45,7 +49,8 @@ actions, and plain error sentences. Never return the API key, tool credentials, 
 
 Unit level: keep the template's tests passing after adapting it (`node --test
 templates/node/harnessrouter.test.ts`, `python3 -m unittest templates/python/test_harnessrouter.py`)
-and add tests for the product's routes with the HarnessRouter client mocked.
+and add tests for the product's routes with the HarnessRouter client mocked, including that every
+task and follow-up sends the signed-in person's id as `user`.
 
 Live: end user, product UI, authenticated route, server mapping, the Harness, the stream, files,
 the renderer. Verify as applicable:
@@ -61,7 +66,22 @@ the renderer. Verify as applicable:
 - idempotent retry: the same key and body replay, never a second run;
 - no key in browser bundles, logs, screenshots, generated files, or the transcript;
 - a second user cannot read, continue, cancel, preview, or download the first user's work;
+- memory, when `ensure` printed a `per_user` memory: a task without `user` gets no memory, and a
+  task with user A never recalls user B's facts (below);
 - the final result is usable inside the product.
+
+Memory check, with two test users and made-up facts, through the product's own route:
+
+1. As B, say one distinctive fact plainly ("my locker code is 4417") and, in a second task, ask
+   the agent to remember another ("remember my cat is called Biscuit"). Wait for both tasks to end.
+2. As B, in a new task, ask for both facts. They must come back; if not, memory is not working and
+   step 3 proves nothing.
+3. As A, in a new task, ask for B's locker code and cat's name, also naming B. Neither may appear.
+4. From the server, a direct API call (the product's route always sends `user`): one task without
+   `user` asking for the same facts must recall nothing.
+
+A `shared` memory is one pool for everyone the agent serves. If its tasks carry one person's or one
+customer's private data, tell the user before shipping.
 
 A direct API call or the template's `e2e` check diagnoses one layer; it does not complete the
 feature.

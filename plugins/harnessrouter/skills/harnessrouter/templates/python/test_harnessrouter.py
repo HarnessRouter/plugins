@@ -157,7 +157,7 @@ class ClientTest(unittest.TestCase):
             if "/files" in c["url"]:
                 return FakeResponse({"session_id": SID, "count": 2, "files": FILES})
             return FakeResponse(FINAL)
-        hr, _ = client(route)
+        hr, r = client(route)
         store = hrm.MemoryTaskStore()
         got = []
         leave = hrm.subscribe("t1", lambda p: got.append(p["kind"]))
@@ -169,6 +169,10 @@ class ClientTest(unittest.TestCase):
         self.assertEqual(got, ["activity", "text", "done"])
         store.put(replace(done, task_id="t2", status="in_progress"))
         self.assertEqual(hrm.recover_task(hr, store, "t2").status, "completed")
+        hrm.run_task(hr, store, hrm.TaskRecord("t3", "u1", "chrn_1", "k3"), "again", previous_response_id=RID, session_id=SID)
+        posts = [c["body"] for c in r.calls if c["method"] == "POST"]
+        self.assertEqual([p.get("user") for p in posts], ["u1", "u1"])   # the end user goes out on start and follow-up
+        self.assertNotIn("user", hrm.HarnessRouter.task_body("chrn_1", "x", "stream"))
 
     def test_find_by_exact_name_and_if_match(self):
         def route(c):

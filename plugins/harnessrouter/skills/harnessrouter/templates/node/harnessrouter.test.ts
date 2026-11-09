@@ -132,7 +132,7 @@ test('HRError reads the UHP envelope and the legacy detail', async () => {
 });
 
 test('runTask persists, publishes progress, settles with changed files; recoverTask polls', async () => {
-  const { fetch } = mockFetch((c) => {
+  const { fetch, calls } = mockFetch((c) => {
     if (c.method === 'POST') return new Response(streamOf(STREAM), { status: 200 });
     if (c.url.includes('/files')) return json({ session_id: SID, count: 2, files: FILES });
     return json(FINAL);
@@ -150,6 +150,9 @@ test('runTask persists, publishes progress, settles with changed files; recoverT
   assert.deepEqual(got, ['activity', 'text', 'done']);
   await store.put({ ...done, taskId: 't2', status: 'in_progress' });
   assert.equal((await recoverTask(hr, store, 't2'))?.status, 'completed');
+  await runTask(hr, store, { ...rec, taskId: 't3', idempotencyKey: 'k3' }, 'again', { previousResponseId: RID, sessionId: SID });
+  // the end user goes out as `user` on the start and on the follow-up
+  assert.deepEqual(calls.filter((c) => c.method === 'POST').map((c) => (c.body as { user?: string }).user), ['u1', 'u1']);
 });
 
 test('signPreview / verifyPreview: genuine, tampered, expired, malformed', () => {

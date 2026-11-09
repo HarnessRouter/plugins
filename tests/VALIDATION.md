@@ -36,3 +36,12 @@ Every contract the Skill documents was exercised on `https://api.harnessrouter.a
 - Fresh-agent test: a headless Claude Code run with only this Skill built a working support-reply drafter from an empty folder without fetching any harnessrouter.ai page, inspecting sessions or asking a question.
 
 Not validated: Codex and Cursor fresh-agent runs, a human-operated GUI key entry, PPTX/XLSX `/pdf`, a forced `failed` task.
+
+## Memory provisioning, 0.3.0-dev.2 (2026-11-08)
+
+- `python3 -m unittest tests/test_cloud_scope.py tests/test_key_setup.py tests/test_check_contract.py tests/test_templates.py tests/test_harness_config.py`: 44 passed (exit 0), including the Node template suite on Node 22.23.
+- `node --test templates/node/harnessrouter.test.ts`: 13 passed; `python3 -m unittest templates/python/test_harnessrouter.py`: 13 passed; the Node template type-checks under `tsc --strict` with `erasableSyntaxOnly` (TypeScript 5.9.3).
+- `scripts/check_contract.py` live, without a key: exit 0, no drift. Cloud discovery reports `memories: false`, so `ensure` sends no `memory` and prints its one note.
+- `scripts/harness_config.py ensure` with a fake client: `memory` is sent only when discovery reports `memories`; the service's `{engine, scope, reason}` is printed; a service that ignores the field or hides discovery gets the note and exit 0; reuse never changes memory; `update` never sends `memory`. A mutation that always sends `memory` fails 2 of these tests.
+
+Not validated: the memory shapes against a live service (none serves them yet), `PUT /v1/harnesses/{id}/memory`, the response's wording when memory is skipped, and the cross-user memory check on a real agent.

@@ -211,11 +211,15 @@ class HarnessRouter:
     # ── tasks ──
     @staticmethod
     def task_body(harness_id: str, input: Any, mode: str, previous_response_id: Optional[str] = None,
-                  session_id: Optional[str] = None, **budgets: Any) -> Json:
+                  session_id: Optional[str] = None, user: Optional[str] = None, **budgets: Any) -> Json:
+        """`user`: the product's own id for the signed-in person this task serves, on every task and
+        follow-up. Memory is kept separately per person by it; never take it from the user's input."""
         meta = {"harness_id": harness_id}
         if session_id:
             meta["session_id"] = session_id
         body: Json = {"input": input, "metadata": meta}
+        if user:
+            body["user"] = user
         if previous_response_id:
             body["previous_response_id"] = previous_response_id
         for k in ("max_step", "timeout_seconds", "max_cost_usd"):
@@ -229,11 +233,11 @@ class HarnessRouter:
 
     def run_streamed(self, harness_id: str, input: Any, *, previous_response_id: Optional[str] = None,
                      session_id: Optional[str] = None, idempotency_key: Optional[str] = None,
-                     on_ids: Optional[Callable[[str, str], None]] = None,
+                     user: Optional[str] = None, on_ids: Optional[Callable[[str, str], None]] = None,
                      on_event: Optional[Callable[[Json], None]] = None, **budgets: Any) -> Json:
         """Start (or continue) a task and read its stream to the end; return the terminal response.
         A stream that ends without a terminal event is recovered by polling, never resent."""
-        body = self.task_body(harness_id, input, "stream", previous_response_id, session_id, **budgets)
+        body = self.task_body(harness_id, input, "stream", previous_response_id, session_id, user, **budgets)
         res = self._send("POST", "/v1/responses", body,
                          {"Accept": "text/event-stream", "Idempotency-Key": idempotency_key or str(uuid.uuid4())},
                          timeout=budgets.get("timeout_seconds", 7200) + 300)
@@ -387,7 +391,8 @@ def run_task(hr: HarnessRouter, store, rec: TaskRecord, input: Any,
              previous_response_id: Optional[str] = None, session_id: Optional[str] = None) -> TaskRecord:
     """Run one task for a product user to the end, persisting the ids at response.created and the
     result at the end. Start it in a background thread (start_task) so it outlives the request.
-    For a follow-up pass previous_response_id and session_id from the stored record."""
+    For a follow-up pass previous_response_id and session_id from the stored record. rec.user_id
+    goes out as the task's `user` every time (the signed-in person's id from the product's session)."""
     state = {"rec": replace(rec, updated_at=time.time())}
     store.put(state["rec"])
 
@@ -402,7 +407,7 @@ def run_task(hr: HarnessRouter, store, rec: TaskRecord, input: Any,
 
     try:
         r = hr.run_streamed(rec.harness_id, input, previous_response_id=previous_response_id, session_id=session_id,
-                            idempotency_key=rec.idempotency_key, on_ids=on_ids, on_event=on_event)
+                            idempotency_key=rec.idempotency_key, user=rec.user_id, on_ids=on_ids, on_event=on_event)
         return _settle(hr, store, state["rec"], r)
     except HRError:
         failed = replace(state["rec"], status="failed", updated_at=time.time())

@@ -3,11 +3,13 @@
 
 import copy
 import importlib.util
+import io
 import json
 from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "plugins" / "harnessrouter" / "skills" / "harnessrouter" / "scripts" / "harness_config.py"
@@ -23,10 +25,30 @@ LIVE = {"id": "chrn_1", "name": "Support replies", "base": "hermes", "baseLabel"
         "maxCostUsd": 0.25, "reasoningEffort": "", "environment": "", "disabledTools": [], "engineMember": None}
 
 
+# Discovery as Cloud answered it on 2026-11-08 (abridged): memory not provisioned yet.
+UHP = {"object": "uhp.discovery", "protocol": "uhp", "versions": ["2026-10-19", "2026-09-28"],
+       "default_version": "2026-09-28", "capabilities": {"harness_management": True, "memories": False},
+       "implementation": {"name": "HarnessRouter Cloud", "version": "0.3.0"}}
+# The memory contract (spec A.1): a memory object, or memory null plus one sentence of why.
+PROVISIONED = {"memory": {"id": "mem_1", "name": "Support replies", "engine": "mem0", "scope": "per_user",
+                          "reason": "It serves people, so it keeps each person's facts and preferences, separately per person."}}
+NONE_CHOSEN = {"memory": None, "memory_reason": "This agent works on what it's given each time; memory would add nothing."}
+
+
 class FakeClient:
-    def __init__(self, harnesses=None, models=("gpt-5.4", "deepseek-v4-pro"), put_error=None):
+    def __init__(self, harnesses=None, models=("gpt-5.4", "deepseek-v4-pro"), put_error=None, memories=False,
+                 answer=lambda body: {}):
         self.store = {h["id"]: copy.deepcopy(h) for h in (harnesses or [])}
         self.models, self.put_error, self.puts = models, put_error, []
+        self.memories, self.answer, self.created = memories, answer, []
+
+    def request(self, method, path, body=None, headers=None):
+        assert (method, path) == ("GET", "/v1/uhp"), (method, path)
+        if isinstance(self.memories, Exception):
+            raise self.memories
+        doc = copy.deepcopy(UHP)
+        doc["capabilities"]["memories"] = self.memories
+        return doc
 
     def bases(self):
         return {"bases": [{"id": "hermes", "defaultModel": "gpt-5.4",
@@ -36,8 +58,10 @@ class FakeClient:
         return next((copy.deepcopy(h) for h in self.store.values() if h["name"] == name), None)
 
     def create_harness(self, body):
+        self.created.append(copy.deepcopy(body))
         h = {**copy.deepcopy(LIVE), "id": "chrn_new", "name": body["name"], "base": body["base"],
-             "defaultModel": body["default_model"], "systemPrompt": body["system_prompt"], "mcpServers": [], "skills": []}
+             "defaultModel": body["default_model"], "systemPrompt": body["system_prompt"], "mcpServers": [], "skills": [],
+             **copy.deepcopy(self.answer(body))}
         self.store[h["id"]] = h
         return copy.deepcopy(h)
 
@@ -115,6 +139,75 @@ class HarnessConfigTest(unittest.TestCase):
         self.assertEqual(HC.update(c, self.project, "chrn_1", {"system_prompt": "x"})[0]["status"], "BASE_IMMUTABLE")
         c = FakeClient([LIVE])
         self.assertEqual(HC.update(c, self.project, "chrn_1", {"default_model": "off"})[0]["status"], "MODEL_NOT_AVAILABLE")
+
+
+class MemoryTest(unittest.TestCase):
+    """ensure sends memory only where discovery offers it, prints the service's choice, never fails for it."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.project = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def ensure(self, c, memory="auto"):
+        return HC.ensure(c, self.project, "Support replies", "hermes", "gpt-5.4", "do it", None, memory)
+
+    def test_a_service_without_memories_gets_no_field_and_one_note(self):
+        c = FakeClient(memories=False)
+        out, code = self.ensure(c)
+        self.assertEqual((code, out["status"], out["note"]), (0, "CREATED", HC.NO_MEMORY_NOTE))
+        self.assertNotIn("memory", c.created[0])
+        self.assertNotIn("memory", out)
+        c = FakeClient(memories=False)
+        out, code = self.ensure(c, "none")
+        self.assertEqual((code, "note" in out, "memory" in c.created[0]), (0, False, False))
+
+    def test_auto_is_sent_and_the_service_choice_is_printed(self):
+        c = FakeClient(memories=True, answer=lambda b: PROVISIONED if b.get("memory") == "auto" else {})
+        out, code = self.ensure(c)
+        self.assertEqual(c.created[0]["memory"], "auto")
+        self.assertEqual((code, out["status"]), (0, "CREATED"))
+        self.assertEqual(out["memory"], {"engine": "mem0", "scope": "per_user", "reason": PROVISIONED["memory"]["reason"]})
+        self.assertNotIn("note", out)
+        self.assertEqual(sorted(json.loads((self.project / "harnessrouter.json").read_text())),
+                         ["base", "harness_id", "instructions", "model", "name"])
+
+    def test_none_is_sent_and_the_service_reason_is_printed(self):
+        c = FakeClient(memories=True, answer=lambda b: NONE_CHOSEN if b.get("memory") == "none" else {})
+        out, code = self.ensure(c, "none")
+        self.assertEqual(c.created[0]["memory"], "none")
+        self.assertEqual(out["memory"], {"engine": None, "scope": None, "reason": NONE_CHOSEN["memory_reason"]})
+        self.assertEqual(code, 0)
+
+    def test_a_service_that_ignores_the_field_or_hides_discovery_never_fails(self):
+        c = FakeClient(memories=True)                       # offered, but the answer says nothing of memory
+        out, code = self.ensure(c)
+        self.assertEqual((code, out["status"], out["note"]), (0, "CREATED", HC.NO_MEMORY_NOTE))
+        c = FakeClient(memories=HRError(503, {"error": {"code": "unavailable"}}))
+        out, code = self.ensure(c)
+        self.assertEqual((code, out["note"]), (0, HC.NO_MEMORY_NOTE))
+        self.assertNotIn("memory", c.created[0])
+
+    def test_reuse_reports_memory_and_never_changes_it(self):
+        c = FakeClient([{**LIVE, **PROVISIONED}], memories=True)
+        out, code = self.ensure(c, "none")
+        self.assertEqual((code, out["status"], out["memory"]["engine"]), (0, "REUSED", "mem0"))
+        self.assertEqual((c.created, c.puts), ([], []))
+        out, _ = self.ensure(FakeClient([LIVE], memories=True))
+        self.assertNotIn("memory", out)
+
+    def test_update_never_sends_memory_in_the_full_replace(self):
+        c = FakeClient([{**LIVE, **PROVISIONED}], memories=True)
+        out, code = HC.update(c, self.project, "chrn_1", {"system_prompt": "new"})
+        self.assertEqual((code, out["status"]), (0, "UPDATED"))
+        self.assertNotIn("memory", c.puts[0][1])
+
+    def test_the_cli_takes_auto_or_none_never_an_engine(self):
+        with mock.patch("sys.stderr", io.StringIO()), self.assertRaises(SystemExit) as e:
+            HC.main(["ensure", "--project", str(self.project), "--memory", "mem0"])
+        self.assertEqual(e.exception.code, 2)
 
 
 if __name__ == "__main__":

@@ -61,6 +61,14 @@ class CheckContractTest(unittest.TestCase):
         self.assertEqual(result["implementation"], "HarnessRouter Cloud")
         self.assertFalse(any("Community Edition" in n for n in result["notes"]))
 
+    def test_memories_is_reported_and_never_drift(self):
+        self.assertFalse(CC.check(API, None, 5, fake(DOCS))[0]["memories"])      # absent
+        for offered in (False, True):
+            docs = copy.deepcopy(DOCS)
+            docs["/v1/uhp"]["capabilities"]["memories"] = offered
+            result, code = CC.check(API, None, 5, fake(docs))
+            self.assertEqual((code, result["drift"], result["memories"]), (0, [], offered))
+
     def test_an_earlier_community_edition_name_is_a_harmless_note(self):
         docs = copy.deepcopy(DOCS)
         docs["/v1/uhp"]["implementation"]["name"] = "HarnessRouter Community Edition"

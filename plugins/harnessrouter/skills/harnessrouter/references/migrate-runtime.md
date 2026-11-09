@@ -24,8 +24,9 @@ being replaced or moved. Adding a new feature to an existing product belongs to 
    starting from a template (`templates/node/harnessrouter.ts` or
    `templates/python/harnessrouter.py`) and the contracts in [api-reference.md](api-reference.md).
    Map product users, tenants, features, sessions, files, and outputs to Cloud identifiers without
-   exposing account-wide resources. Old runtime session IDs are not HarnessRouter IDs, and old
-   histories are not uploaded by default.
+   exposing account-wide resources; each task sends its end user's product id as `user`. Old
+   runtime session IDs are not HarnessRouter IDs, and old histories and old memory stores are not
+   uploaded by default.
 6. Replay approved synthetic or sanitized jobs. Disable or fixture writes, payments, publishing,
    and outgoing messages during replay unless the user explicitly authorizes those side effects.
 7. Compare output quality and Artifact usability, p50 and p95 latency, cost per successful job,

@@ -7,6 +7,7 @@ secrets). This file is the procedure.
 
 - The Workspace is the key's
 - Reuse by name, or create
+- Memory
 - Budgets and defaults
 - Configure instructions, with an output contract template
 - Configure Tools and MCP servers
@@ -23,15 +24,17 @@ handoff so later sessions use the same one.
 
 ## Reuse by name, or create
 
-1. Plan the Harness (name, purpose, base and model from the table in
+1. Plan the Harness (name, purpose, end users, memory, base and model from the table in
    [agent-features-and-harnesses.md](agent-features-and-harnesses.md), instructions, tools,
    budgets).
 `scripts/harness_config.py ensure` does steps 2 to 4 and keeps the key out of command lines:
 
 ```bash
 python3 scripts/harness_config.py ensure --project <project> --name "Support replies" \
-  --base hermes --model gpt-5.4 --instructions <project>/harness-instructions.txt
-# {"status": "CREATED", "harness_id": "chrn_…", ...}  or  {"status": "REUSED", ..., "differs_from_request": [...]}
+  --base hermes --model gpt-5.4 --instructions <project>/harness-instructions.txt --memory auto
+# {"status": "CREATED", "harness_id": "chrn_…", ..., "memory": {"engine": "…", "scope": "per_user", "reason": "…"}}
+#   or ..., "note": "This service does not provision memory yet, ..."}
+# {"status": "REUSED", ..., "differs_from_request": [...]}
 ```
 
 By hand:
@@ -52,11 +55,34 @@ By hand:
 }
 ```
 
+   Add `"memory": "auto"` or `"none"` from the plan only when discovery reports `memories`.
 4. Store the returned `id` in server configuration (not in browser code) and in `harnessrouter.json`
    ([persistent-use.md](persistent-use.md)).
 
 A `422 model_not_available` lists the models the base offers in `error.detail.offered`; pick from
 the table's fallbacks rather than from that list at random.
+
+## Memory
+
+The service provisions an agent's memory; this Skill only says whether the agent wants it.
+
+- `ensure` reads discovery (`GET /v1/uhp`, as `check_contract.py` does). When it reports
+  `"memories": true`, a create sends the plan's `memory` (`"auto"` or `"none"`) and prints what
+  the service provisioned: `memory` with `engine`, `scope` (`per_user`: kept separately for each
+  person; `shared`: one memory for the agent) and `reason`, or a null engine with the service's
+  reason for none. Accept it. Never send an engine on Cloud.
+- When discovery does not report `memories`, nothing is sent and, for `auto`, `ensure` prints one
+  `note`: the agent works without memory. Not a failure; nothing to fix.
+- A reused Harness keeps its memory; `ensure` prints it when the service reports it. Give an
+  existing agent memory with `PUT /v1/harnesses/{id}/memory` and `{"memory": "auto"}`, after
+  telling the user, since it changes their agent.
+- Later, HarnessRouter Cloud provisions HarnessRouter memory, its own memory system, for agents
+  created with `"auto"`. The platform switches it on; this Skill and the product change nothing.
+- The product server sends the end user's id as `user` on every task
+  ([runtime-integration.md](runtime-integration.md)); without it, a per-person agent's task runs
+  with memory off.
+- Only for a user who already runs their own HarnessRouter server:
+  [self-hosted-memory.md](self-hosted-memory.md).
 
 ## Budgets and defaults
 

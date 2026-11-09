@@ -5,6 +5,7 @@
 - Classify the request
 - Inventory agent-powered features
 - Decide Harness boundaries
+- Decide memory
 - Choose the base and model
 - Plan multi-Harness handoffs
 
@@ -53,6 +54,8 @@ match. Never one Harness per button, never one all-powerful Harness for unrelate
 Name:                      (2 to 4 words naming what users get, e.g. "Support replies")
 Feature keys:
 Purpose:
+End users:                 (who the tasks serve, and the product's own id sent as `user`)
+Memory:                    auto | none, and one line of why
 Allowed inputs/data:
 Output folder, entry point, manifest:
 Instructions:
@@ -61,6 +64,34 @@ Permissions and approval gates:
 Base, model, budgets:
 Failure and incomplete behavior:
 ```
+
+## Decide memory
+
+Decide `Memory` from what the agent is for; do not ask the user unless they raised it.
+
+- `none`: each task stands alone. A single-shot transform (translate, format, convert, extract,
+  classify, summarize the given text, lint, review a given diff) has nothing to carry to the next
+  task.
+- `auto`: the agent serves people who come back (assistant, support, tutor, coach, sales,
+  onboarding), learns from its own work (coding, operations, incidents), tracks things that change
+  (accounts, projects, research, competitors), or keeps notes people read (docs, knowledge base,
+  journal). When unsure, `auto`.
+
+The engine, and whether memory is kept separately per person or shared, are the service's call:
+never choose an engine. `End users` names who sends tasks and which id of theirs the product
+server sends as `user` ([runtime-integration.md](runtime-integration.md)). Examples:
+
+```text
+End users:  signed-in store customers; user = the store's customer id
+Memory:     auto. It answers returning customers, so it should know each one's orders and preferences.
+
+End users:  any signed-in member; user = the member id
+Memory:     none. Each request is one document to translate; nothing carries to the next.
+```
+
+Pass the line to `scripts/harness_config.py ensure --memory auto|none`, then tell the user in one
+line what it printed: `memory` (engine, per person or shared, and the service's reason) or its
+`note` ([workspace-and-configuration.md](workspace-and-configuration.md), Memory).
 
 ## Choose the base and model
 

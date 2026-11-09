@@ -32,7 +32,7 @@ both. Ask a routing question only when the code cannot show whether a runtime is
 Ask what to ship to their users when it is not stated, and the stack only for an empty folder when
 nothing indicates one. Decide the rest yourself and state each choice in one line: base and model
 (the table in [agent-features-and-harnesses.md](references/agent-features-and-harnesses.md)),
-Harness name and instructions, routes, storage, and UI. Never ask for the API key in chat.
+memory, Harness name and instructions, routes, storage, and UI. Never ask for the API key in chat.
 
 ## The path, in order
 
@@ -45,20 +45,20 @@ Run scripts from this folder; `<project>` is the product's root.
    `python3 scripts/key_setup.py check --project <project>`. Every status prints its next step.
 4. **Contract with the key:** `python3 scripts/check_contract.py --project <project>` (read-only).
    Its `recommended` list shows which base and model pairings this account can run.
-5. **Plan the Harness:** boundaries, base and model from
+5. **Plan the Harness:** boundaries, end users, `Memory: auto | none`, base and model from
    [agent-features-and-harnesses.md](references/agent-features-and-harnesses.md); instructions
    from the output contract template in
    [workspace-and-configuration.md](references/workspace-and-configuration.md).
 6. **Reuse or create:** write the instructions to a file, then
    `python3 scripts/harness_config.py ensure --project <project> --name <name> --base <base>
-   --model <model> --instructions <file>`. It reuses the Harness whose `name` matches exactly or
-   creates one, checks the model is available, and writes `harnessrouter.json`. Keep the printed
-   `harness_id` in server configuration.
+   --model <model> --instructions <file> --memory <auto|none>`. It reuses the Harness whose `name`
+   matches exactly or creates one, checks the model is available, and writes `harnessrouter.json`.
+   Keep the printed `harness_id` in server configuration; tell the user its `memory` or `note`.
 7. **Integrate:** copy `templates/node/harnessrouter.ts` or `templates/python/harnessrouter.py`
    into server-only code and wire the product routes per
    [runtime-integration.md](references/runtime-integration.md) and
-   [files-artifacts-and-rendering.md](references/files-artifacts-and-rendering.md). Keep its unit
-   tests passing.
+   [files-artifacts-and-rendering.md](references/files-artifacts-and-rendering.md). Every task
+   sends the signed-in end user's id as `user`. Keep its unit tests passing.
 8. **Verify:** run one real task through the product's own route, with its files and preview when
    it makes files. A direct API call or the template's `e2e` proves one layer only.
 9. **Hand off:** check `harnessrouter.json` and add the project block from
@@ -73,6 +73,7 @@ and never claim Cloud completion from mocks.
 - Call HarnessRouter from browser code, or let the browser see the key, a `harness_id`, a
   `download_url`, account-wide lists, or raw upstream errors.
 - Take a `harness_id` from the browser: the server maps each product feature to its Harness.
+- Take `user` from anything the person typed, or choose a memory engine.
 - Send the host-product goal ("build my app") as a runtime task.
 - Tie the upstream stream to the browser connection: the server reads it to the end.
 - Serve generated HTML from the product's origin outside the signed sandboxed preview.
@@ -84,20 +85,21 @@ and never claim Cloud completion from mocks.
 | Read | When |
 |---|---|
 | [api-reference.md](references/api-reference.md) | Any request, response, status, or error shape |
-| [agent-features-and-harnesses.md](references/agent-features-and-harnesses.md) | Harness boundaries; the base and model table |
-| [workspace-and-configuration.md](references/workspace-and-configuration.md) | Create, reuse, change a Harness; instructions template; tools, MCP, secrets, Skills; budgets |
-| [runtime-integration.md](references/runtime-integration.md) | Tasks, stream events and parser, follow-ups, background mode, cancel, recovery |
+| [agent-features-and-harnesses.md](references/agent-features-and-harnesses.md) | Harness boundaries; memory; the base and model table |
+| [workspace-and-configuration.md](references/workspace-and-configuration.md) | Create, reuse, change a Harness; memory; instructions template; tools, MCP, secrets, Skills; budgets |
+| [runtime-integration.md](references/runtime-integration.md) | Tasks, `user`, stream events and parser, follow-ups, background mode, cancel, recovery |
 | [files-artifacts-and-rendering.md](references/files-artifacts-and-rendering.md) | Files, renderers, signed previews, downloads |
 | [key-setup.md](references/key-setup.md) | Before the first authenticated call; server key loaders |
 | [persistent-use.md](references/persistent-use.md) | `harnessrouter.json`, later changes, keeping the Skill available |
-| [security-and-testing.md](references/security-and-testing.md) | Tenancy checks and the acceptance list |
+| [security-and-testing.md](references/security-and-testing.md) | Tenancy checks, the memory check, the acceptance list |
 | [self-update.md](references/self-update.md) | Installed Plugin or fresh clone freshness |
+| [self-hosted-memory.md](references/self-hosted-memory.md) | Only when the user already runs their own HarnessRouter server and wants memory there |
 
 | Code | Use |
 |---|---|
 | `scripts/check_contract.py` | Discovery, then read-only contract check. Exit 0 ok, 1 drift, 2 blocked |
 | `scripts/key_setup.py` | `check`, `collect` (macOS hidden prompt), `replace`, `verify` |
-| `scripts/harness_config.py` | `ensure` (reuse by name or create), `update` (fetch, full PUT, re-read), `show`; keeps `harnessrouter.json` |
+| `scripts/harness_config.py` | `ensure` (reuse by name, or create with memory), `update` (fetch, full PUT, re-read), `show`; keeps `harnessrouter.json` |
 | `templates/node/` | `harnessrouter.ts` adapter, `harnessrouter.test.ts` (`node --test <file>`: name the file, a folder argument finds no `.ts` tests), `e2e.ts` live check |
 | `templates/python/` | `harnessrouter.py` adapter, `test_harnessrouter.py` (`python3 -m unittest`), `e2e.py` live check |
 

@@ -6,7 +6,8 @@
   python3 scripts/check_contract.py --project <dir>    also GET /v1/bases, /v1/models, /v1/harnesses,
                                                        with HR_API_KEY or <dir>/.env.harnessrouter
 
-Read-only. Prints one JSON object: version_to_send, capabilities, the recommended base and model
+Read-only. Prints one JSON object: version_to_send, capabilities, `memories` (true when the service
+provisions memory for new agents), the recommended base and model
 pairings with their live availability, and `drift` (documented fields missing or of another
 type). Exit 0: no drift. 1: drift (report it; do not guess around it). 2: blocked (network, key
 rejected, discovery not served). The key is never printed.
@@ -193,6 +194,7 @@ def check(base_url: str, key: str | None, timeout: float, get=http_get) -> tuple
     for k in NEEDED_CAPABILITIES:
         if caps.get(k) is not True:
             result["drift"].append(f"uhp.capabilities.{k}: not true")
+    result["memories"] = caps.get("memories") is True     # optional: false or absent is not drift
     impl = (doc.get("implementation") or {}).get("name")
     result["implementation"] = impl
     if impl == "HarnessRouter Community Edition":

@@ -13,7 +13,7 @@ existing sessions to learn a shape.
 - Discovery: `GET /v1/uhp`
 - Identity: `GET /v1/me`
 - Catalog: `GET /v1/bases`, `GET /v1/models`, `GET /v1/harnesses/{id}/models`
-- Harnesses: list, create, get, replace, delete
+- Harnesses: list, create, get, replace, delete, memory
 - Responses: start (stream, background, blocking), get, cancel
 - Sessions: list, get, turns, files, cancel
 - Container files: content and `/pdf`
@@ -95,6 +95,8 @@ request path, not as a missing resource.
   while it is listed in `versions`. Newer versions are additive (the same objects answer), so a newer
   one adds nothing this Skill uses. If `2026-09-28` disappears from `versions`, send
   `default_version` and run `check_contract.py` with a key before relying on any shape.
+- `capabilities.memories`: `true` when the service provisions memory for new agents (the `memory`
+  field below). Cloud answered `false` on 2026-11-08; then send no `memory` field.
 
 ## Identity
 
@@ -208,6 +210,20 @@ Required: `name`, `base`. Optional, all snake_case: `default_model`, `system_pro
 `disabled_tools`. Answer: `200` with the stored Harness object above. Errors: `422`
 `invalid_request`, `model_not_available`, `unsupported_base`.
 
+`memory` (only when discovery reports `memories`): `"auto"` (the service decides) or `"none"`.
+This Skill never sends an engine. The answer, and every Harness answer, then carries what was
+provisioned, either
+
+```json
+{"memory": {"id": "<memory id>", "name": "Support replies", "engine": "<engine>",
+            "scope": "per_user", "reason": "<one sentence>"}}
+```
+
+or `"memory": null` with `"memory_reason": "<one sentence, why none>"`. `scope` is `per_user`
+(kept separately for each end user, by the task's `user`) or `shared`. These memory shapes are the
+service's contract, not yet observed on Cloud; `check_contract.py` lists them under `new_fields`
+once served.
+
 `mcp_servers` entry, as stored and read back:
 
 ```json
@@ -248,7 +264,14 @@ Content-Type: application/json
 
 Body: the same fields as `POST`. Answer: `200 <Harness>` with a new `ETag`. `412
 precondition_failed` when `If-Match` is stale (nothing was written). `409 harness_mismatch` when
-`base` differs from the stored base. The procedure is in persistent-use.md.
+`base` differs from the stored base. The procedure is in persistent-use.md. Do not send `memory`
+here; use the next endpoint.
+
+### PUT /v1/harnesses/{id}/memory
+
+Only when discovery reports `memories`. Body `{"memory": "auto"}` or `{"memory": "none"}`:
+(re)provisions and answers the Harness with its `memory`. A new engine gets a new memory; the old
+one is kept, unattached. Nothing is deleted.
 
 ### DELETE /v1/harnesses/{id}
 
@@ -277,7 +300,8 @@ Idempotency-Key: <fresh UUID per new task>
 New task:
 
 ```json
-{"input": "<what the end user asked>", "metadata": {"harness_id": "chrn_…"}, "stream": true}
+{"input": "<what the end user asked>", "user": "<the product's id for this person>",
+ "metadata": {"harness_id": "chrn_…"}, "stream": true}
 ```
 
 Follow-up on the same result (the canonical body):
@@ -285,6 +309,7 @@ Follow-up on the same result (the canonical body):
 ```json
 {
   "input": "<the user's follow-up>",
+  "user": "<the product's id for this person>",
   "previous_response_id": "resp_…",
   "metadata": {"harness_id": "chrn_…", "session_id": "hsess…"},
   "stream": true
@@ -294,6 +319,7 @@ Follow-up on the same result (the canonical body):
 | Field | Required | Notes |
 |---|---|---|
 | `input` | yes | A string, or a message list for files (below). |
+| `user` | every request | The product's own stable id for the signed-in person the task serves, set by the server from its session, never from input. Memory is kept separately per person by it; a per-person agent's task without it runs with memory off. A service without memory ignores it. |
 | `metadata.harness_id` | yes, every request | Set by the product server, never by the browser. On a follow-up it must be the Harness the session started on: a different id is accepted and runs that other Harness's instructions inside this session. |
 | `previous_response_id` | follow-ups | The response being continued. |
 | `metadata.session_id` | optional | On a follow-up, either this or `previous_response_id` continues the session. Send both. |

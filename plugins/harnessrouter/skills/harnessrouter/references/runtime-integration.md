@@ -9,6 +9,7 @@ instead of rewriting it.
 
 - The server route
 - New task or follow-up
+- The end user: `user`
 - Stream events and where the data is
 - Parse the stream
 - Persist ids, and keep consuming after the browser leaves
@@ -27,6 +28,7 @@ Browser
   -> product route (authenticates the user, checks the feature and any files)
   -> server maps feature_key to an approved harness_id
   -> POST https://api.harnessrouter.ai/v1/responses with the key from the server's environment
+     and the signed-in user's id as `user`
   -> server consumes the stream, persists ids and the result with the user's record
   -> server forwards sanitized progress to the browser while it listens
 ```
@@ -36,13 +38,29 @@ never sends or receives the key, a `harness_id`, raw HarnessRouter errors or acc
 
 ## New task or follow-up
 
-One user request is one task: send `input` and `metadata.harness_id`, no `previous_response_id`.
-Send a follow-up only when the user continues the same result (revise, ask about it); it carries
-the whole earlier conversation, so it costs more than a new task.
+One user request is one task: send `input`, `user` and `metadata.harness_id`, no
+`previous_response_id`. Send a follow-up only when the user continues the same result (revise, ask
+about it); it carries the whole earlier conversation, so it costs more than a new task.
 
 ```json
-{"input": "<what the user typed>", "metadata": {"harness_id": "chrn_…"}, "stream": true}
+{"input": "<what the user typed>", "user": "<the product's id for this person>",
+ "metadata": {"harness_id": "chrn_…"}, "stream": true}
 ```
+
+## The end user: `user`
+
+Send `user` on every task and every follow-up. The templates do it: `runTask` / `run_task` send
+the task record's `userId` / `user_id`.
+
+- It is the product's own id for the signed-in person the task serves, taken from the
+  authenticated session on the server. Never text the person typed, a browser field, or a name.
+- Make it stable and unique across the whole product: the same person always sends the same
+  value, and two people never share one (prefix it with the customer account when ids repeat
+  across accounts). An opaque id is better than an email.
+- Why: memory is kept separately per person. An agent whose memory is per person recalls and
+  keeps facts only in that person's memory, so one person's facts never reach another's task.
+- Without `user`, a task of a per-person agent runs with memory off, and the response says memory
+  was skipped because no end user was named. A service without memory ignores the field.
 
 ## Stream events and where the data is
 
@@ -141,6 +159,7 @@ The canonical follow-up body:
 ```json
 {
   "input": "Make the heading green.",
+  "user": "<the product's id for this person>",
   "previous_response_id": "resp_…",
   "metadata": {"harness_id": "chrn_…", "session_id": "hsess…"},
   "stream": true
@@ -148,7 +167,7 @@ The canonical follow-up body:
 ```
 
 - Required: `input`, `metadata.harness_id`, and `previous_response_id` or `metadata.session_id`.
-  Send both, from the user's stored task record.
+  Send both, from the user's stored task record, and `user` as on every task.
 - `metadata.harness_id` must be the Harness the session started on. A different id was accepted
   and ran the other Harness's instructions inside the same session, so the server must always
   send the stored one.
@@ -160,7 +179,8 @@ The canonical follow-up body:
 ## Background mode
 
 ```json
-{"input": "<what the user typed>", "metadata": {"harness_id": "chrn_…"}, "background": true}
+{"input": "<what the user typed>", "user": "<the product's id for this person>",
+ "metadata": {"harness_id": "chrn_…"}, "background": true}
 ```
 
 The answer comes at once: the response object with `status: "in_progress"`, `output: []`, and

@@ -10,8 +10,8 @@ what each part must produce.
    names, or the one the folder already implies; ask which stack only if nothing does.
 2. **Keep what exists.** In an existing product keep its UI, auth, database, design, and working
    features. Build only the feature and the shared integration it needs.
-3. **Plan Harnesses** by purpose, permissions, tools, and output contract, not by button count,
-   and choose base and model from the table
+3. **Plan Harnesses** by purpose, permissions, tools, and output contract, not by button count;
+   name the end users, decide `Memory: auto | none`, and choose base and model from the table
    ([agent-features-and-harnesses.md](agent-features-and-harnesses.md)).
 4. **Write the instructions** with the output contract template
    ([workspace-and-configuration.md](workspace-and-configuration.md)): one output folder, one entry
@@ -20,7 +20,8 @@ what each part must produce.
 6. **Build the server side** from a template (`templates/node/harnessrouter.ts` or
    `templates/python/harnessrouter.py`):
    - an authenticated route that creates the product's own task record (user, tenant,
-     `feature_key`, harness id, a fresh idempotency key) and starts the task without awaiting it;
+     `feature_key`, harness id, a fresh idempotency key) and starts the task without awaiting it,
+     sending the signed-in user's id as `user` ([runtime-integration.md](runtime-integration.md));
    - a progress route (Server-Sent Events or polling) that reads the task record and the
      template's `subscribe()` feed;
    - a task detail route that returns the answer, the file list, and a signed preview URL, after
@@ -33,8 +34,9 @@ what each part must produce.
    Continue when the result can be revised, and plain error and incomplete states. Never show
    upstream ids, raw errors, or internal names.
 8. **Test** with the template's unit tests adapted to your routes, then one real task through the
-   product's own route (SKILL.md step 8). Include a follow-up when the feature has one, and a
-   second user's denial on the detail, preview, and download routes.
+   product's own route (SKILL.md step 8). Include a follow-up when the feature has one, a
+   second user's denial on the detail, preview, and download routes, and, when the agent has a
+   per-person memory, the memory check in [security-and-testing.md](security-and-testing.md).
 
 If Cloud authentication is unavailable, build the routes, adapter, mocks, UI, and tests that need
 no key, and report Harness creation and the live task as pending. Never substitute a local
